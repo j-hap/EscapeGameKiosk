@@ -1,0 +1,103 @@
+<UserControl x:Class="EscapeGameKiosk.ExitScreenView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             mc:Ignorable="d"
+             d:DesignHeight="450"
+             d:DesignWidth="800">
+  <Grid x:Name="ExitScreenRoot"
+        Background="#0B0B0B"
+        TextElement.FontFamily="/EscapeGameKiosk;component/Fonts/#Orbitron"
+        TextElement.Foreground="#E6E6E6">
+    <Button x:Name="ExitCancelButtonControl"
+            Content="←"
+            Height="28"
+            Width="28"
+            FontSize="12"
+            Style="{StaticResource OrbitronButtonStyle}"
+            Command="{Binding CancelExitCommand}"
+            HorizontalAlignment="Left"
+            VerticalAlignment="Top"
+            Margin="16">
+      <Button.Template>
+        <ControlTemplate TargetType="Button">
+          <Border Background="{TemplateBinding Background}"
+                  BorderBrush="{TemplateBinding BorderBrush}"
+                  BorderThickness="{TemplateBinding BorderThickness}"
+                  CornerRadius="10">
+            <ContentPresenter HorizontalAlignment="Center"
+                              VerticalAlignment="Center"/>
+          </Border>
+        </ControlTemplate>
+      </Button.Template>
+    </Button>
+    <Border Background="#1C1C1C"
+            BorderBrush="#3C3C3C"
+            BorderThickness="2"
+            Padding="36"
+            CornerRadius="8"
+            HorizontalAlignment="Center"
+            VerticalAlignment="Center">
+      <Grid>
+        <StackPanel Orientation="Vertical"
+                    Width="360">
+          <TextBlock Text="CONFIRM EXIT"
+                     FontSize="20"
+                     FontWeight="Bold"
+                     FontStretch="UltraExpanded"
+                     HorizontalAlignment="Center"
+                     Margin="0,0,0,18"/>
+          <Grid Margin="0,0,0,12">
+            <Grid.ColumnDefinitions>
+              <ColumnDefinition Width="*"/>
+              <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+            <PasswordBox x:Name="ExitPasswordInputBox"
+                         Grid.Column="0"
+                         Height="36"
+                         FontSize="16"
+                         Style="{StaticResource OrbitronPasswordBoxStyle}"
+                         Margin="0,0,8,0"
+                         HorizontalContentAlignment="Center"
+                         VerticalContentAlignment="Center"
+                         PasswordChar="●">
+              <PasswordBox.Template>
+                <ControlTemplate TargetType="PasswordBox">
+                  <Border Background="{TemplateBinding Background}"
+                          BorderBrush="{TemplateBinding BorderBrush}"
+                          BorderThickness="{TemplateBinding BorderThickness}"
+                          CornerRadius="12">
+                    <ScrollViewer x:Name="PART_ContentHost"
+                                  HorizontalContentAlignment="{TemplateBinding HorizontalContentAlignment}"
+                                  VerticalContentAlignment="{TemplateBinding VerticalContentAlignment}"/>
+                  </Border>
+                </ControlTemplate>
+              </PasswordBox.Template>
+            </PasswordBox>
+            <Button x:Name="ExitConfirmButtonControl"
+                    Grid.Column="1"
+                    Content="➤"
+                    Height="36"
+                    Width="36"
+                    FontSize="14"
+                    Style="{StaticResource OrbitronButtonStyle}"
+                    Command="{Binding ConfirmExitCommand}">
+              <Button.Template>
+                <ControlTemplate TargetType="Button">
+                  <Border Background="{TemplateBinding Background}"
+                          BorderBrush="{TemplateBinding BorderBrush}"
+                          BorderThickness="{TemplateBinding BorderThickness}"
+                          CornerRadius="12">
+                    <ContentPresenter HorizontalAlignment="Center"
+                                      VerticalAlignment="Center"/>
+                  </Border>
+                </ControlTemplate>
+              </Button.Template>
+            </Button>
+          </Grid>
+        </StackPanel>
+      </Grid>
+    </Border>
+  </Grid>
+</UserControl>

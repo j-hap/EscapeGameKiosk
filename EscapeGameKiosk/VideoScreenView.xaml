@@ -1,0 +1,233 @@
+﻿<UserControl x:Class="EscapeGameKiosk.VideoScreenView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:wv2="clr-namespace:Microsoft.Web.WebView2.Wpf;assembly=Microsoft.Web.WebView2.Wpf"
+             mc:Ignorable="d"
+             d:DesignHeight="450"
+             d:DesignWidth="800">
+  <UserControl.Resources>
+    <BooleanToVisibilityConverter x:Key="BoolToVis"/>
+  </UserControl.Resources>
+  <Grid x:Name="VideoScreenRoot"
+        Background="Black">
+    <Grid.RowDefinitions>
+      <RowDefinition Height="*"/>
+      <RowDefinition Height="Auto"/>
+    </Grid.RowDefinitions>
+
+    <MediaElement x:Name="VideoPlayerElement"
+                  Grid.Row="0"
+                  LoadedBehavior="Manual"
+                  UnloadedBehavior="Manual"
+                  Stretch="Uniform"
+                  Visibility="{Binding IsLocalVideo, Converter={StaticResource BoolToVis}}"/>
+
+    <wv2:WebView2 x:Name="WebVideoElement"
+                  Grid.Row="0"
+                  Visibility="{Binding IsWebVideo, Converter={StaticResource BoolToVis}}"/>
+
+    <Grid Grid.Row="0"
+          Visibility="{Binding IsWebVideoLoading, Converter={StaticResource BoolToVis}}">
+      <Border Background="Black"
+              Opacity="0.85"/>
+      <StackPanel HorizontalAlignment="Center"
+                  VerticalAlignment="Center">
+        <TextBlock Text="Loading video…"
+                   FontFamily="/EscapeGameKiosk;component/Fonts/#Orbitron"
+                   Foreground="#E6E6E6"
+                   FontSize="18"
+                   HorizontalAlignment="Center"/>
+        <ProgressBar IsIndeterminate="True"
+                     Width="240"
+                     Height="6"
+                     Margin="0,12,0,0"/>
+      </StackPanel>
+    </Grid>
+
+    <Grid Grid.Row="1"
+          Background="Black"
+          Margin="12">
+      <Grid.ColumnDefinitions>
+        <ColumnDefinition Width="Auto"/>
+        <ColumnDefinition Width="Auto"/>
+        <ColumnDefinition Width="*"/>
+        <ColumnDefinition Width="Auto"/>
+        <ColumnDefinition Width="Auto"/>
+        <ColumnDefinition Width="Auto"/>
+      </Grid.ColumnDefinitions>
+      <Button x:Name="PlayPauseButtonControl"
+              Grid.Column="0"
+              Content="{Binding PlayPauseButtonContent, Mode=OneWay}"
+              Width="36"
+              Height="36"
+              Margin="5"
+              FontSize="14"
+              Style="{StaticResource OrbitronButtonStyle}"
+              Command="{Binding PlayPauseCommand}"
+              Visibility="{Binding IsLocalVideo, Converter={StaticResource BoolToVis}}"
+              FontFamily="Segoe UI Symbol">
+        <Button.Template>
+          <ControlTemplate TargetType="Button">
+            <Border Background="{TemplateBinding Background}"
+                    BorderBrush="{TemplateBinding BorderBrush}"
+                    BorderThickness="{TemplateBinding BorderThickness}"
+                    CornerRadius="12">
+              <ContentPresenter HorizontalAlignment="Center"
+                                VerticalAlignment="Center"
+                                TextElement.FontFamily="{TemplateBinding FontFamily}"/>
+            </Border>
+          </ControlTemplate>
+        </Button.Template>
+      </Button>
+      <Button x:Name="StopButtonControl"
+              Grid.Column="1"
+              Content="&#x23F9;"
+              Width="36"
+              Height="36"
+              Margin="5"
+              FontSize="14"
+              Style="{StaticResource OrbitronButtonStyle}"
+              Command="{Binding StopVideoCommand}"
+              Visibility="{Binding IsLocalVideo, Converter={StaticResource BoolToVis}}"
+              FontFamily="Segoe UI Symbol">
+        <Button.Template>
+          <ControlTemplate TargetType="Button">
+            <Border Background="{TemplateBinding Background}"
+                    BorderBrush="{TemplateBinding BorderBrush}"
+                    BorderThickness="{TemplateBinding BorderThickness}"
+                    CornerRadius="12">
+              <ContentPresenter HorizontalAlignment="Center"
+                                VerticalAlignment="Center"
+                                TextElement.FontFamily="{TemplateBinding FontFamily}"/>
+            </Border>
+          </ControlTemplate>
+        </Button.Template>
+      </Button>
+      <Grid Grid.Column="2"
+            VerticalAlignment="Center"
+            Margin="5">
+        <Grid.Visibility>
+          <Binding Path="IsLocalVideo"
+              Converter="{StaticResource BoolToVis}"/>
+        </Grid.Visibility>
+        <Grid.ColumnDefinitions>
+          <ColumnDefinition Width="*"/>
+          <ColumnDefinition Width="Auto"/>
+        </Grid.ColumnDefinitions>
+
+        <Slider x:Name="SeekToSlider"
+                Grid.Column="0"
+                VerticalAlignment="Center"
+                Margin="0"
+                MinWidth="120"
+                Value="{Binding Position, Mode=TwoWay}"
+                Maximum="{Binding Duration, Mode=OneWay}"/>
+
+        <TextBlock Grid.Column="1"
+                   Margin="10,0,0,0"
+                   VerticalAlignment="Center"
+                   FontFamily="/EscapeGameKiosk;component/Fonts/#Orbitron"
+                   Foreground="#E6E6E6"
+                   FontSize="12"
+                   Text="{Binding PlaybackTimestamp, Mode=OneWay}"/>
+      </Grid>
+      <ToggleButton x:Name="VolumeButtonControl"
+                    Grid.Column="3"
+                    Content="&#x1F4E2;"
+                    Width="36"
+                    Height="36"
+                    Margin="5"
+                    FontSize="14"
+                    Style="{StaticResource OrbitronToggleButtonStyle}"
+                    FontFamily="Segoe UI Symbol"
+                    Visibility="{Binding IsLocalVideo, Converter={StaticResource BoolToVis}}">
+        <ToggleButton.Template>
+          <ControlTemplate TargetType="ToggleButton">
+            <Border Background="{TemplateBinding Background}"
+                    BorderBrush="{TemplateBinding BorderBrush}"
+                    BorderThickness="{TemplateBinding BorderThickness}"
+                    CornerRadius="12">
+              <ContentPresenter HorizontalAlignment="Center"
+                                VerticalAlignment="Center"
+                                TextElement.FontFamily="{TemplateBinding FontFamily}"/>
+            </Border>
+          </ControlTemplate>
+        </ToggleButton.Template>
+      </ToggleButton>
+      <Popup Placement="Top"
+             PlacementTarget="{Binding ElementName=VolumeButtonControl}"
+             IsOpen="{Binding IsChecked, ElementName=VolumeButtonControl}"
+             StaysOpen="False">
+        <Border Background="#1C1C1C"
+                BorderBrush="#3C3C3C"
+                BorderThickness="1"
+                CornerRadius="8"
+                Padding="8">
+          <Slider x:Name="VolumeSlider"
+                  Orientation="Vertical"
+                  Minimum="0"
+                  Maximum="1"
+                  Value="{Binding Volume, Mode=TwoWay}"
+                  Height="120"
+                  Width="30"/>
+        </Border>
+      </Popup>
+      <ComboBox x:Name="SpeedRatioComboBox"
+                Grid.Column="4"
+                VerticalAlignment="Center"
+                Width="80"
+                Margin="5"
+                SelectedIndex="3"
+                Visibility="{Binding IsLocalVideo, Converter={StaticResource BoolToVis}}">
+        <ComboBox.Resources>
+          <Style TargetType="Popup">
+            <Setter Property="Placement"
+                    Value="Top"/>
+          </Style>
+        </ComboBox.Resources>
+        <ComboBoxItem Content="0.25x"
+                      Tag="0.25"/>
+        <ComboBoxItem Content="0.5x"
+                      Tag="0.5"/>
+        <ComboBoxItem Content="0.75x"
+                      Tag="0.75"/>
+        <ComboBoxItem Content="1.0x"
+                      Tag="1.0"/>
+        <ComboBoxItem Content="1.25x"
+                      Tag="1.25"/>
+        <ComboBoxItem Content="1.5x"
+                      Tag="1.5"/>
+        <ComboBoxItem Content="1.75x"
+                      Tag="1.75"/>
+        <ComboBoxItem Content="2x"
+                      Tag="2.0"/>
+      </ComboBox>
+
+      <Button x:Name="LockButtonControl"
+              Grid.Column="5"
+              Content="&#x1F512;"
+              Width="36"
+              Height="36"
+              Margin="5"
+              FontSize="14"
+              Style="{StaticResource OrbitronButtonStyle}"
+              Command="{Binding LockCommand}"
+              FontFamily="Segoe UI Symbol">
+        <Button.Template>
+          <ControlTemplate TargetType="Button">
+            <Border Background="{TemplateBinding Background}"
+                    BorderBrush="{TemplateBinding BorderBrush}"
+                    BorderThickness="{TemplateBinding BorderThickness}"
+                    CornerRadius="12">
+              <ContentPresenter HorizontalAlignment="Center"
+                                VerticalAlignment="Center"
+                                TextElement.FontFamily="{TemplateBinding FontFamily}"/>
+            </Border>
+          </ControlTemplate>
+        </Button.Template>
+      </Button>
+    </Grid>
+  </Grid>
+</UserControl>
