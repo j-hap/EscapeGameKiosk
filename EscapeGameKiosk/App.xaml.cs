@@ -6,6 +6,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using EscapeGameKiosk.Contracts;
+using EscapeGameKiosk.Gestures;
 using EscapeGameKiosk.Services;
 using EscapeGameKiosk.State;
 using EscapeGameKiosk.ViewModels;
@@ -42,6 +43,7 @@ public partial class App : Application
 
         // Services
         services.AddSingleton<IConfigurationValidator, ConfigurationValidator>();
+        services.AddSingleton<ITouchGestureService, TouchGestureService>();
         services.AddSingleton<IPasswordValidationService>(sp =>
           new PasswordValidationService(
             Constants.Lockout.BaseSeconds,
@@ -172,9 +174,89 @@ public partial class App : Application
     logger.LogInformation("Configuration validation successful");
     logger.LogInformation("Application starting with dependency injection enabled");
 
+    // Check whether three/four-finger touchpad gestures are still enabled.
+    // If so, prompt the user to disable them via Windows Settings.
+    try
+    {
+      var gestureService = _host.Services.GetRequiredService<ITouchGestureService>();
+
+      while (true)
+      {
+        var enabled = gestureService.GetEnabledGestureNames();
+        if (enabled.Count == 0)
+        {
+          logger.LogInformation("All three/four-finger touchpad gestures are disabled");
+          break;
+        }
+
+        logger.LogWarning("Enabled touchpad gestures detected: {Gestures}", string.Join(", ", enabled));
+
+        var result = ShowGestureWarning(enabled);
+
+        if (result == MessageBoxResult.Cancel)
+        {
+          logger.LogInformation("User cancelled — exiting because touchpad gestures are still enabled");
+          Shutdown(0);
+          return;
+        }
+
+        // User pressed Retry — loop and re-check.
+      }
+    }
+    catch (Exception ex)
+    {
+      logger.LogWarning(ex, "Failed to check touchpad gesture settings — continuing anyway");
+    }
+
     // Show MainWindow
     var mainWindow = _host.Services.GetRequiredService<MainWindow>();
     mainWindow.Show();
+  }
+
+  private static MessageBoxResult ShowGestureWarning(IReadOnlyList<string> enabledGestures)
+  {
+    // Open the Windows Settings touchpad page in the background so the user
+    // can switch to it immediately.
+    try
+    {
+      System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo
+      {
+        FileName = "ms-settings:devices-touchpad",
+        UseShellExecute = true,
+      });
+    }
+    catch
+    {
+      // Settings app not available — the dialog text still tells the user where to go.
+    }
+
+    var friendlyNames = enabledGestures
+      .Select(name => name switch
+      {
+        "ThreeFingerTapEnabled" => "Three-finger tap",
+        "ThreeFingerSlideEnabled" => "Three-finger swipe",
+        "FourFingerTapEnabled" => "Four-finger tap",
+        "FourFingerSlideEnabled" => "Four-finger swipe",
+        _ => name,
+      })
+      .ToList();
+
+    var message =
+      "The following touchpad gestures must be disabled before the kiosk app can start:\n\n" +
+      string.Join("\n", friendlyNames.Select(n => $"  • {n}")) +
+      "\n\n" +
+      "Windows does not provide a public API to change these settings programmatically,\n" +
+      "so they must be disabled manually.\n\n" +
+      "The Windows Settings touchpad page has been opened for you.\n" +
+      "Please set each of the listed gestures to \"Nothing\", then press Retry.\n\n" +
+      "Settings path:  Bluetooth & devices → Touchpad → Three-finger gestures / Four-finger gestures\n\n" +
+      "Press Retry after disabling, or Cancel to exit.";
+
+    return MessageBox.Show(
+      message,
+      "Touchpad Gestures — EscapeGameKiosk",
+      MessageBoxButton.RetryCancel,
+      MessageBoxImage.Warning);
   }
 
   protected override void OnExit(ExitEventArgs e)

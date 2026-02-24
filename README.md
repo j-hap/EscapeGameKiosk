@@ -38,6 +38,41 @@ dotnet publish .\EscapeGameKiosk\EscapeGameKiosk.csproj -c Release -r win-x64 /p
 
 The output EXE is under `bin\Release\net10.0-windows\win-x64\publish`.
 
+## MSIX (per-user) + Installer
+
+This repo ships a per-user MSIX and a small user-mode installer/uninstaller that installs/uninstalls the MSIX for the current user.
+
+Build a distributable set (MSIX + cert + installer EXE):
+
+```
+pwsh -NoProfile -ExecutionPolicy Bypass -File .\scripts\build-dist.ps1 -Configuration Release -RuntimeIdentifier win-x64 -Version 1.0.0.0
+```
+
+Outputs:
+
+- `artifacts\dist\EscapeGameKiosk.msix`
+- `artifacts\dist\EscapeGameKiosk.cer` (current-user trusted certificate)
+- `artifacts\dist\EscapeGameKioskInstaller.exe`
+
+Install:
+
+```
+cd .\artifacts\dist
+.\EscapeGameKioskInstaller.exe install --msix .\EscapeGameKiosk.msix --cert .\EscapeGameKiosk.cer
+```
+
+Uninstall:
+
+```
+cd .\artifacts\dist
+.\EscapeGameKioskInstaller.exe uninstall
+```
+
+### Session-based gesture disabling (runtime)
+
+When the app starts and gestures are detected as enabled, it offers to disable them for the current session.
+If you choose “Yes”, the app restores the original settings when it exits.
+
 ## Configuration
 
 Edit `appsettings.json`:
