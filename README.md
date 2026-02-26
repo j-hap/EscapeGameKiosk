@@ -36,42 +36,11 @@ dotnet test .\EscapeGameKiosk.sln -c Debug
 dotnet publish .\EscapeGameKiosk\EscapeGameKiosk.csproj -c Release -r win-x64 /p:PublishSingleFile=true /p:SelfContained=true
 ```
 
-The output EXE is under `bin\Release\net10.0-windows\win-x64\publish`.
+Output: `EscapeGameKiosk\bin\Release\net10.0-windows\win-x64\publish\EscapeGameKiosk.exe`
 
-## MSIX (per-user) + Installer
+## Touchpad gesture check on startup
 
-This repo ships a per-user MSIX and a small user-mode installer/uninstaller that installs/uninstalls the MSIX for the current user.
-
-Build a distributable set (MSIX + cert + installer EXE):
-
-```
-pwsh -NoProfile -ExecutionPolicy Bypass -File .\scripts\build-dist.ps1 -Configuration Release -RuntimeIdentifier win-x64 -Version 1.0.0.0
-```
-
-Outputs:
-
-- `artifacts\dist\EscapeGameKiosk.msix`
-- `artifacts\dist\EscapeGameKiosk.cer` (current-user trusted certificate)
-- `artifacts\dist\EscapeGameKioskInstaller.exe`
-
-Install:
-
-```
-cd .\artifacts\dist
-.\EscapeGameKioskInstaller.exe install --msix .\EscapeGameKiosk.msix --cert .\EscapeGameKiosk.cer
-```
-
-Uninstall:
-
-```
-cd .\artifacts\dist
-.\EscapeGameKioskInstaller.exe uninstall
-```
-
-### Session-based gesture disabling (runtime)
-
-When the app starts and gestures are detected as enabled, it offers to disable them for the current session.
-If you choose “Yes”, the app restores the original settings when it exits.
+When the app starts it reads the registry to check whether any three- or four-finger precision touchpad gestures are enabled. If any are detected, the app opens the Windows Settings touchpad page (`ms-settings:devices-touchpad`) and shows a dialog listing the enabled gestures with instructions to set each to **Nothing** under *Bluetooth & devices → Touchpad → Three-finger gestures / Four-finger gestures*. After making the changes, press **Retry** to re-check. Press **Cancel** to exit the app without launching the kiosk.
 
 ## Configuration
 
@@ -101,14 +70,4 @@ Windows does not allow apps to block secure attention keys (Ctrl+Alt+Del). For f
 
 ## Touchpad gestures
 
-Multi-finger touchpad gestures are handled by Windows. To disable three- and four-finger gestures on setup machines, run:
-
-```
-powershell -ExecutionPolicy Bypass -File scripts\disable-touchpad-gestures.ps1
-```
-
-To restore the previous settings later:
-
-```
-powershell -ExecutionPolicy Bypass -File scripts\reenable-touchpad-gestures.ps1
-```
+Multi-finger touchpad gestures are handled by Windows, not the app. The app checks for enabled gestures at startup and guides you to disable them manually via Windows Settings (see [Touchpad gesture check on startup](#touchpad-gesture-check-on-startup)). There are no standalone scripts for disabling or re-enabling gestures.

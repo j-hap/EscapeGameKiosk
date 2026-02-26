@@ -1,9 +1,12 @@
 ﻿using Microsoft.Extensions.Logging;
+using SharpVectors.Converters;
+using SharpVectors.Renderers.Wpf;
 using System;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
+using System.Windows.Media.Imaging;
 using System.Windows.Threading;
 using EscapeGameKiosk.Contracts;
 using EscapeGameKiosk.Services;
@@ -38,7 +41,37 @@ public partial class MainWindow : Window
   public MainWindow()
   {
     InitializeComponent();
+    SetIconFromSvg();
     ApplyWindowMode();
+  }
+
+  private void SetIconFromSvg()
+  {
+    try
+    {
+      var svgUri = new Uri("pack://application:,,,/Assets/logo.svg");
+      var streamInfo = Application.GetResourceStream(svgUri);
+      if (streamInfo is null) return;
+
+      var settings = new WpfDrawingSettings { IncludeRuntime = true, TextAsGeometry = false };
+      var reader = new FileSvgReader(settings);
+      var drawing = reader.Read(streamInfo.Stream);
+      if (drawing is null) return;
+
+      var image = new DrawingImage(drawing);
+      var visual = new DrawingVisual();
+      using (var ctx = visual.RenderOpen())
+        ctx.DrawImage(image, new Rect(0, 0, 32, 32));
+
+      var bmp = new RenderTargetBitmap(32, 32, 96, 96, PixelFormats.Pbgra32);
+      bmp.Render(visual);
+      bmp.Freeze();
+      Icon = bmp;
+    }
+    catch
+    {
+      // Non-critical: window still opens without a custom icon
+    }
   }
 
   // Initialize method called by DI factory

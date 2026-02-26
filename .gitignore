@@ -57,3 +57,7 @@ TestResult.xml
 nunit-*.xml
 
 .vs
+
+# Generated icon assets (produced by Assets/Generate-Icons.ps1 via BeforeBuild)
+EscapeGameKiosk/Assets/*.ico
+EscapeGameKiosk/Assets/*.png

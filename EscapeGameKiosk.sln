@@ -9,6 +9,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EscapeGameKiosk.Tests", "Es
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EscapeGameKiosk.Gestures", "EscapeGameKiosk.Gestures\EscapeGameKiosk.Gestures.csproj", "{0B03A882-8C32-4D4D-8BEA-2F3E2504E6D0}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EscapeGameKiosk.IconGen", "EscapeGameKiosk.IconGen\EscapeGameKiosk.IconGen.csproj", "{F1B36909-48AB-44C6-9AAE-4B8DF3E22AAE}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -55,6 +57,18 @@ Global
 		{0B03A882-8C32-4D4D-8BEA-2F3E2504E6D0}.Release|x64.Build.0 = Release|Any CPU
 		{0B03A882-8C32-4D4D-8BEA-2F3E2504E6D0}.Release|x86.ActiveCfg = Release|Any CPU
 		{0B03A882-8C32-4D4D-8BEA-2F3E2504E6D0}.Release|x86.Build.0 = Release|Any CPU
+		{F1B36909-48AB-44C6-9AAE-4B8DF3E22AAE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F1B36909-48AB-44C6-9AAE-4B8DF3E22AAE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F1B36909-48AB-44C6-9AAE-4B8DF3E22AAE}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{F1B36909-48AB-44C6-9AAE-4B8DF3E22AAE}.Debug|x64.Build.0 = Debug|Any CPU
+		{F1B36909-48AB-44C6-9AAE-4B8DF3E22AAE}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{F1B36909-48AB-44C6-9AAE-4B8DF3E22AAE}.Debug|x86.Build.0 = Debug|Any CPU
+		{F1B36909-48AB-44C6-9AAE-4B8DF3E22AAE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F1B36909-48AB-44C6-9AAE-4B8DF3E22AAE}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F1B36909-48AB-44C6-9AAE-4B8DF3E22AAE}.Release|x64.ActiveCfg = Release|Any CPU
+		{F1B36909-48AB-44C6-9AAE-4B8DF3E22AAE}.Release|x64.Build.0 = Release|Any CPU
+		{F1B36909-48AB-44C6-9AAE-4B8DF3E22AAE}.Release|x86.ActiveCfg = Release|Any CPU
+		{F1B36909-48AB-44C6-9AAE-4B8DF3E22AAE}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
