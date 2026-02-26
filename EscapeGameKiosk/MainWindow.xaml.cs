@@ -175,7 +175,9 @@ public partial class MainWindow : Window
 
         _exitViewModel?.ClearPassword();
         _navigationController.ShowExitOverlay();
-        _exitScreenView.ExitPasswordInput.Focus();
+        Dispatcher.BeginInvoke(
+          new Action(() => _exitScreenView?.FocusPasswordInput()),
+          DispatcherPriority.Input);
         return;
 
       default:

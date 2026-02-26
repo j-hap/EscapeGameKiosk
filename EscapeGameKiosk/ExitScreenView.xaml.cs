@@ -31,6 +31,11 @@ public partial class ExitScreenView : UserControl
   public Button ExitConfirmButton => ExitConfirmButtonControl;
   public Button ExitCancelButton => ExitCancelButtonControl;
 
+  public void FocusPasswordInput()
+  {
+    ExitPasswordInputBox.Focus();
+  }
+
   private void ExitPasswordInputBox_OnPasswordChanged(object sender, RoutedEventArgs e)
   {
     if (_isUpdatingPassword || _viewModel == null)
