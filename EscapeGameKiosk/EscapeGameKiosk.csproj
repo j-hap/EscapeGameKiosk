@@ -6,6 +6,7 @@
     <AssemblyName>EscapeGameKiosk</AssemblyName>
     <RootNamespace>EscapeGameKiosk</RootNamespace>
     <TargetFramework>net10.0-windows</TargetFramework>
+    <RuntimeIdentifiers>win-x64</RuntimeIdentifiers>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <UseWPF>true</UseWPF>

@@ -1,0 +1,29 @@
+<Project Sdk="WixToolset.Sdk/6.0.2" InitialTargets="GenerateLicenseRtf">
+  <PropertyGroup>
+    <OutputName>EscapeGameKioskSetup</OutputName>
+    <OutputType>Bundle</OutputType>
+    <Platform>x64</Platform>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <!-- Forward Version to the WiX preprocessor as $(var.Version) -->
+    <DefineConstants>Version=$(Version)</DefineConstants>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="WixToolset.Bal.wixext" Version="6.*" />
+  </ItemGroup>
+
+  <!-- Build the MSI before the Bundle -->
+  <ItemGroup>
+    <ProjectReference Include="..\EscapeGameKiosk.Installer\EscapeGameKiosk.Installer.wixproj" />
+  </ItemGroup>
+  <!--
+    Generate LICENSE.rtf from the plain-text LICENSE file so the bundle can display
+    the license text inline (rtfLicense theme requires RTF format).
+    LICENSE.rtf is a build artifact — it is gitignored and never committed.
+  -->
+  <Target Name="GenerateLicenseRtf">
+    <Exec Command="powershell.exe -NoProfile -ExecutionPolicy Bypass -File &quot;$(MSBuildThisFileDirectory)GenerateLicenseRtf.ps1&quot; &quot;$(MSBuildThisFileDirectory)..\LICENSE&quot; &quot;$(MSBuildThisFileDirectory)..\LICENSE.rtf&quot;" />
+  </Target>
+</Project>

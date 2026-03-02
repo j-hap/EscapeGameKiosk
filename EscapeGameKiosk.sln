@@ -11,6 +11,10 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EscapeGameKiosk.Gestures", 
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EscapeGameKiosk.IconGen", "EscapeGameKiosk.IconGen\EscapeGameKiosk.IconGen.csproj", "{F1B36909-48AB-44C6-9AAE-4B8DF3E22AAE}"
 EndProject
+Project("{B7DD6F7E-DEF8-4E67-B5B7-07EF123DB6F0}") = "EscapeGameKiosk.Installer", "EscapeGameKiosk.Installer\EscapeGameKiosk.Installer.wixproj", "{FB3250F7-8598-4980-8376-B2A7F621DD00}"
+EndProject
+Project("{B7DD6F7E-DEF8-4E67-B5B7-07EF123DB6F0}") = "EscapeGameKiosk.Bundle", "EscapeGameKiosk.Bundle\EscapeGameKiosk.Bundle.wixproj", "{C117768E-8E0B-42B5-9558-94B4D02E226F}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -69,6 +73,30 @@ Global
 		{F1B36909-48AB-44C6-9AAE-4B8DF3E22AAE}.Release|x64.Build.0 = Release|Any CPU
 		{F1B36909-48AB-44C6-9AAE-4B8DF3E22AAE}.Release|x86.ActiveCfg = Release|Any CPU
 		{F1B36909-48AB-44C6-9AAE-4B8DF3E22AAE}.Release|x86.Build.0 = Release|Any CPU
+		{FB3250F7-8598-4980-8376-B2A7F621DD00}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FB3250F7-8598-4980-8376-B2A7F621DD00}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FB3250F7-8598-4980-8376-B2A7F621DD00}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{FB3250F7-8598-4980-8376-B2A7F621DD00}.Debug|x64.Build.0 = Debug|Any CPU
+		{FB3250F7-8598-4980-8376-B2A7F621DD00}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{FB3250F7-8598-4980-8376-B2A7F621DD00}.Debug|x86.Build.0 = Debug|Any CPU
+		{FB3250F7-8598-4980-8376-B2A7F621DD00}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FB3250F7-8598-4980-8376-B2A7F621DD00}.Release|Any CPU.Build.0 = Release|Any CPU
+		{FB3250F7-8598-4980-8376-B2A7F621DD00}.Release|x64.ActiveCfg = Release|Any CPU
+		{FB3250F7-8598-4980-8376-B2A7F621DD00}.Release|x64.Build.0 = Release|Any CPU
+		{FB3250F7-8598-4980-8376-B2A7F621DD00}.Release|x86.ActiveCfg = Release|Any CPU
+		{FB3250F7-8598-4980-8376-B2A7F621DD00}.Release|x86.Build.0 = Release|Any CPU
+		{C117768E-8E0B-42B5-9558-94B4D02E226F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C117768E-8E0B-42B5-9558-94B4D02E226F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C117768E-8E0B-42B5-9558-94B4D02E226F}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{C117768E-8E0B-42B5-9558-94B4D02E226F}.Debug|x64.Build.0 = Debug|Any CPU
+		{C117768E-8E0B-42B5-9558-94B4D02E226F}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{C117768E-8E0B-42B5-9558-94B4D02E226F}.Debug|x86.Build.0 = Debug|Any CPU
+		{C117768E-8E0B-42B5-9558-94B4D02E226F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C117768E-8E0B-42B5-9558-94B4D02E226F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C117768E-8E0B-42B5-9558-94B4D02E226F}.Release|x64.ActiveCfg = Release|Any CPU
+		{C117768E-8E0B-42B5-9558-94B4D02E226F}.Release|x64.Build.0 = Release|Any CPU
+		{C117768E-8E0B-42B5-9558-94B4D02E226F}.Release|x86.ActiveCfg = Release|Any CPU
+		{C117768E-8E0B-42B5-9558-94B4D02E226F}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

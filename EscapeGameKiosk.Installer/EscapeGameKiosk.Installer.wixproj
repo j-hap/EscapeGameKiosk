@@ -1,0 +1,62 @@
+<Project Sdk="WixToolset.Sdk/6.0.2">
+  <PropertyGroup>
+    <OutputName>EscapeGameKiosk</OutputName>
+    <Platform>x64</Platform>
+    <!--
+      ICE38, ICE64, and ICE91 are suppressed because they are false positives specific
+      to per-user (Scope="perUser") packages. They cannot be fixed without abandoning
+      the per-user design.
+
+      ICE38: "Component installs to user profile; must use a HKCU registry KeyPath."
+        ICE38 predates Windows Installer 5.0's Scope="perUser" feature. The old way
+        to do per-user installs was ALLUSERS=2, where each component needed a HKCU
+        registry keypath so Windows Installer could track per-user state separately
+        from per-machine state. With Scope="perUser" (WI 5.0+), Windows Installer
+        handles the per-user tracking automatically; file keypaths are correct. The
+        ICE has never been updated to understand this. Fixing it would require adding
+        a dummy HKCU registry value to every auto-harvested component — hundreds of
+        generated components from <Files Include="..."> — which is impractical and
+        would bloat the registry with entries that serve no purpose.
+
+      ICE64: "Directory in user profile not listed in RemoveFile table."
+        ICE64 wants a <RemoveFolder> entry for every subdirectory under the install
+        root so they are cleaned up on uninstall. With Scope="perUser", Windows
+        Installer already tracks and removes the entire per-user install directory on
+        uninstall. Adding explicit <RemoveFolder> entries for every auto-harvested
+        subdirectory (runtimes\*, locales\*, etc.) is unnecessary and fragile; any
+        new subdirectory added by a .NET publish would silently be missing one.
+
+      ICE91: "File installed to per-user directory that doesn't vary by ALLUSERS."
+        Same root cause as ICE38 — ICE91 expects the ALLUSERS=2 pattern. With
+        Scope="perUser" the install directory is intentionally fixed at
+        %LOCALAPPDATA%\Programs regardless of ALLUSERS.
+
+      References:
+        https://github.com/wixtoolset/issues/issues/8063  (WiX tracking issue)
+        https://learn.microsoft.com/windows/win32/msi/ice38
+        https://learn.microsoft.com/windows/win32/msi/ice64
+    -->
+    <SuppressIces>ICE38;ICE64;ICE91</SuppressIces>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <!-- dotnet publish output – the MSI harvests everything from here.
+         Platform=x64 (inherited by the ProjectReference) puts the output under
+         bin\x64\Release\, not bin\Release\. -->
+    <AppPublishDir>$(MSBuildThisFileDirectory)..\EscapeGameKiosk\bin\x64\Release\net10.0-windows\win-x64\publish\</AppPublishDir>
+    <!-- Forward AppPublishDir and Version to the WiX preprocessor -->
+    <DefineConstants>AppPublishDir=$(AppPublishDir);Version=$(Version)</DefineConstants>
+  </PropertyGroup>
+
+  <!-- Build the app before the installer — Targets="Publish" ensures the
+       publish\ folder is populated (plain Build does not create it). -->
+  <ItemGroup>
+    <ProjectReference Include="..\EscapeGameKiosk\EscapeGameKiosk.csproj"
+                      AdditionalProperties="RuntimeIdentifier=win-x64;SelfContained=false;Configuration=Release"
+                      Targets="Publish" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="WixToolset.UI.wixext" Version="6.*" />
+  </ItemGroup>
+</Project>

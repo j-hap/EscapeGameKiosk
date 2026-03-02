@@ -1,0 +1,80 @@
+<Wix xmlns="http://wixtoolset.org/schemas/v4/wxs"
+  xmlns:ui="http://wixtoolset.org/schemas/v4/wxs/ui">
+
+  <!--
+    Id="EscapeGameKiosk" is the human-readable UpgradeCode introduced in WiX v6.
+    WiX derives a stable GUID from this string — commit it and never change it.
+    Scope="perUser" = no UAC required, installs to %LOCALAPPDATA%\Programs\...
+  -->
+  <Package Name="EscapeGameKiosk"
+    Id="EscapeGameKiosk"
+    Manufacturer="EscapeGameKiosk"
+    Version="$(var.Version)"
+    Scope="perUser">
+
+    <!--
+      WixUI_InstallDir: shows a Browse dialog so the user can change the folder.
+      Because Scope="perUser", the default root is PerUserProgramFilesFolder
+      (%LOCALAPPDATA%\Programs), which requires no elevation.
+      If the user picks a protected path, Windows Installer handles elevation
+      automatically.
+    -->
+    <ui:WixUI Id="WixUI_InstallDir"
+      InstallDirectory="INSTALLFOLDER" />
+
+    <!-- ARP icon -->
+    <Icon Id="AppIcon.ico"
+      SourceFile="$(sys.SOURCEFILEDIR)..\EscapeGameKiosk\Assets\AppIcon.ico" />
+    <Property Id="ARPPRODUCTICON" Value="AppIcon.ico" />
+
+    <!--
+      PerUserProgramFilesFolder = %LOCALAPPDATA%\Programs  (added in WiX v6, issue 8101)
+      This is the correct per-user equivalent of ProgramFilesFolder.
+      The Directory table resolves INSTALLFOLDER at CostFinalize time — no Property
+      override is needed (and setting one causes ICE48 / Error 1606 in silent installs).
+    -->
+    <StandardDirectory Id="PerUserProgramFilesFolder">
+      <Directory Id="INSTALLFOLDER" Name="EscapeGameKiosk" />
+    </StandardDirectory>
+
+    <!-- Start Menu shortcut -->
+    <StandardDirectory Id="ProgramMenuFolder">
+      <Directory Id="ApplicationProgramsFolder" Name="EscapeGameKiosk" />
+    </StandardDirectory>
+
+    <ComponentGroup Id="Shortcuts" Directory="ApplicationProgramsFolder">
+      <Component Id="ApplicationShortcut" Guid="*">
+        <Shortcut Id="AppStartMenu"
+          Name="EscapeGameKiosk"
+          Target="[INSTALLFOLDER]EscapeGameKiosk.exe"
+          WorkingDirectory="INSTALLFOLDER"
+          Icon="AppIcon.ico" />
+        <RemoveFolder Id="CleanupAppProgramsFolder"
+          Directory="ApplicationProgramsFolder"
+          On="uninstall" />
+        <!-- Keypath keeps the component tied to HKCU, compatible with perUser scope -->
+        <RegistryValue Root="HKCU"
+          Key="Software\EscapeGameKiosk"
+          Name="installed"
+          Type="integer"
+          Value="1"
+          KeyPath="yes" />
+      </Component>
+    </ComponentGroup>
+
+    <!--
+      v5+ built-in file harvesting: <Files> replaces Heat / HarvestDirectory.
+      All files under AppPublishDir are included; WiX auto-generates components.
+      $(var.AppPublishDir) is set as a preprocessor variable via the .wixproj.
+    -->
+    <ComponentGroup Id="AppFiles" Directory="INSTALLFOLDER">
+      <Files Include="$(var.AppPublishDir)**\*" />
+    </ComponentGroup>
+
+    <Feature Id="Main">
+      <ComponentGroupRef Id="AppFiles" />
+      <ComponentGroupRef Id="Shortcuts" />
+    </Feature>
+
+  </Package>
+</Wix>

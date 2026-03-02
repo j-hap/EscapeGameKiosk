@@ -1,13 +1,16 @@
 # EscapeGameKiosk
 
-A fullscreen Windows WPF app for escape-room style video playback with a password gate and lock overlay.
+A fullscreen Windows WPF app for escape-room style video playback with a password gate and lock
+overlay.
 
 ## Vibe Coding / AI Disclaimer
 
-Most of this repository was developed with AI assistance (“vibe coding”), including refactors and generated code/tests.
+Most of this repository was developed with AI assistance (“vibe coding”), including refactors and
+generated code/tests.
 
 - Review changes before deploying (especially anything related to kiosk/security behavior).
-- Treat this as application code, not a security product; validate your kiosk hardening at the OS/device level.
+- Treat this as application code, not a security product; validate your kiosk hardening at the
+  OS/device level.
 - If something behaves unexpectedly, assume intent may be ambiguous and verify against requirements.
 
 ## Run (development)
@@ -30,17 +33,76 @@ dotnet run --project .\EscapeGameKiosk -c Debug
 dotnet test .\EscapeGameKiosk.sln -c Debug
 ```
 
-## Publish (single-file EXE)
+## Deploy (installer)
+
+The project builds a self-contained per-user installer — no administrator rights required on the
+target machine.
+
+### Outputs
+
+| File                                                              | Description                                           |
+| ----------------------------------------------------------------- | ----------------------------------------------------- |
+| `EscapeGameKiosk.Bundle\bin\x64\Release\EscapeGameKioskSetup.exe` | Bootstrapper EXE — run this on the target machine     |
+| `EscapeGameKiosk.Installer\bin\x64\Release\EscapeGameKiosk.msi`   | MSI (embedded inside the EXE; also usable standalone) |
+
+### Prerequisites on the target machine
+
+The installer does not bundle the runtimes. Both must be present before running the app:
+
+| Requirement                                                                                 | Notes                                                                                                                              |
+| ------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------- |
+| [.NET 10 Windows Desktop Runtime (x64)](https://dotnet.microsoft.com/download/dotnet/10.0)  | **Must be installed manually if absent.** The installer will place the app files but the app will not launch without this runtime. |
+| [Microsoft Edge WebView2 Runtime](https://developer.microsoft.com/microsoft-edge/webview2/) | Pre-installed on Windows 10 21H2+ and all Windows 11 versions. No action needed on modern machines.                                |
+
+### Build
+
+```powershell
+# First time / CI: restore the WiX CLI tool
+dotnet tool restore
+
+# Build everything: app → publish → MSI → EXE
+dotnet build EscapeGameKiosk.Bundle\EscapeGameKiosk.Bundle.wixproj -c Release -p:Platform=x64
+```
+
+Or build the whole solution (includes tests and other projects):
+
+```powershell
+dotnet build EscapeGameKiosk.sln -c Release
+```
+
+### Install
+
+Run `EscapeGameKioskSetup.exe` on the target machine.
+
+- Installs to `%LOCALAPPDATA%\Programs\EscapeGameKiosk` by default (no UAC prompt).
+- Adds a Start Menu shortcut under **EscapeGameKiosk**.
+- Appears in **Settings → Apps** for clean uninstall.
+- A folder-browse dialog lets you change the install location (UAC is only prompted if you choose a
+  protected path like `C:\Program Files`).
+
+### Uninstall
+
+Use **Settings → Apps → EscapeGameKiosk → Uninstall**, or re-run `EscapeGameKioskSetup.exe` and
+choose **Uninstall**.
+
+### Configuration after install
+
+Edit `appsettings.json` in the install folder before (or after) running the app:
 
 ```
-dotnet publish .\EscapeGameKiosk\EscapeGameKiosk.csproj -c Release -r win-x64 /p:PublishSingleFile=true /p:SelfContained=true
+%LOCALAPPDATA%\Programs\EscapeGameKiosk\appsettings.json
 ```
 
-Output: `EscapeGameKiosk\bin\Release\net10.0-windows\win-x64\publish\EscapeGameKiosk.exe`
+See the [Configuration](#configuration) section for available settings.
 
 ## Touchpad gesture check on startup
 
-When the app starts it reads the registry to check whether any three- or four-finger precision touchpad gestures are enabled. If any are detected, the app opens the Windows Settings touchpad page (`ms-settings:devices-touchpad`) and shows a dialog listing the enabled gestures with instructions to set each to **Nothing** under *Bluetooth & devices → Touchpad → Three-finger gestures / Four-finger gestures*. After making the changes, press **Retry** to re-check. Press **Cancel** to exit the app without launching the kiosk.
+When the app starts it reads the registry to check whether any three- or four-finger precision
+touchpad gestures are enabled. If any are detected, the app opens the Windows Settings touchpad page
+(`ms-settings:devices-touchpad`) and shows a dialog listing the enabled gestures with instructions
+to set each to **Nothing** under *Bluetooth & devices → Touchpad → Three-finger gestures /
+Four-finger gestures*. After making the changes, press **Retry** to re-check. Press **Cancel** to
+exit the app without launching the kiosk.
 
 ## Configuration
 
@@ -49,25 +111,31 @@ Edit `appsettings.json`:
 The app reads settings from the `AppSettings` section:
 
 - `AppSettings:Password`: The unlock password.
-- `AppSettings:VideoPath`: Path to a local video file OR a YouTube URL.
-	- Relative file paths are resolved from the EXE directory.
+- `AppSettings:VideoPath`: Path to a local video file OR a YouTube URL. - Relative file paths are
+	resolved from the EXE directory.
 - `AppSettings:AllowKeyboardHook`: Enable the keyboard hook that blocks common OS shortcuts.
 
 ## Hidden Exit
 
-The app only exits from the password screen. Tap the four screen corners (within ~30px of the corner) in this order:
+The app only exits from the password screen. Tap the four screen corners (within ~30px of the
+corner) in this order:
 
 1. Top-left
 2. Bottom-right
 3. Top-right
 4. Bottom-left
 
-You must complete the sequence within 4 seconds between taps and enter the unlock password to exit the application.
+You must complete the sequence within 4 seconds between taps and enter the unlock password to exit
+the application.
 
 ## Limitations
 
-Windows does not allow apps to block secure attention keys (Ctrl+Alt+Del). For full kiosk behavior, use Windows assigned access or group policy in addition to the app.
+Windows does not allow apps to block secure attention keys (Ctrl+Alt+Del). For full kiosk behavior,
+use Windows assigned access or group policy in addition to the app.
 
 ## Touchpad gestures
 
-Multi-finger touchpad gestures are handled by Windows, not the app. The app checks for enabled gestures at startup and guides you to disable them manually via Windows Settings (see [Touchpad gesture check on startup](#touchpad-gesture-check-on-startup)). There are no standalone scripts for disabling or re-enabling gestures.
+Multi-finger touchpad gestures are handled by Windows, not the app. The app checks for enabled
+gestures at startup and guides you to disable them manually via Windows Settings (see [Touchpad
+gesture check on startup](#touchpad-gesture-check-on-startup)). There are no standalone scripts for
+disabling or re-enabling gestures.

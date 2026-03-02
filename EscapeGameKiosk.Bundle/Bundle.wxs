@@ -1,0 +1,30 @@
+<Wix xmlns="http://wixtoolset.org/schemas/v4/wxs"
+  xmlns:bal="http://wixtoolset.org/schemas/v4/wxs/bal">
+
+  <!--
+    Bundle Id="EscapeGameKiosk.Bundle": human-readable UpgradeCode (WiX v6).
+    The bundle UpgradeCode must differ from the MSI UpgradeCode, hence the suffix.
+
+    Prerequisites (.NET 10 Desktop Runtime, WebView2) are NOT bootstrapped by this
+    bundle — they must be present on the target machine before installation.
+    See README.md § Prerequisites for details.
+  -->
+  <Bundle Name="EscapeGameKiosk"
+    Id="EscapeGameKiosk.Bundle"
+    Version="$(var.Version)"
+    Manufacturer="EscapeGameKiosk">
+
+    <!-- WixStdBA: license confirmation dialog showing the MIT license text inline -->
+    <BootstrapperApplication>
+      <bal:WixStandardBootstrapperApplication
+        Theme="rtfLicense"
+        LicenseFile="..\LICENSE.rtf" />
+    </BootstrapperApplication>
+
+    <Chain>
+      <!-- ── Main MSI (per-user, no elevation) ── -->
+      <MsiPackage SourceFile="$(var.EscapeGameKiosk.Installer.TargetPath)"
+        EnableFeatureSelection="no" />
+    </Chain>
+  </Bundle>
+</Wix>

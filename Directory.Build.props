@@ -1,0 +1,17 @@
+<Project>
+  <!--
+    Single source of truth for the application version.
+    Inherited automatically by all MSBuild projects in this repository
+    (app, tests, WiX installer, WiX bundle) via MSBuild's Directory.Build.props
+    auto-import mechanism.
+
+    To release a new version, bump this value and rebuild the bundle.
+    The same version flows into:
+      - EscapeGameKiosk.exe assembly/file version (via <Version>)
+      - EscapeGameKiosk.msi  Package Version        (via $(var.Version) in Package.wxs)
+      - EscapeGameKioskSetup.exe Bundle Version      (via $(var.Version) in Bundle.wxs)
+  -->
+  <PropertyGroup>
+    <Version>0.1.0.0</Version>
+  </PropertyGroup>
+</Project>

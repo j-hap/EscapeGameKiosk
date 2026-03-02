@@ -61,3 +61,11 @@ nunit-*.xml
 # Generated icon assets (produced by Assets/Generate-Icons.ps1 via BeforeBuild)
 EscapeGameKiosk/Assets/*.ico
 EscapeGameKiosk/Assets/*.png
+
+# WiX installer outputs
+EscapeGameKiosk.Installer/bin/
+EscapeGameKiosk.Installer/obj/
+EscapeGameKiosk.Bundle/bin/
+EscapeGameKiosk.Bundle/obj/
+# Generated from LICENSE at build time by EscapeGameKiosk.Bundle
+LICENSE.rtf
