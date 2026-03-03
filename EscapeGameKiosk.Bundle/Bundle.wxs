@@ -14,6 +14,13 @@
     Version="$(var.Version)"
     Manufacturer="EscapeGameKiosk">
 
+    <!--
+      Bundle variable that accepts the FORCEDOTNETINSTALL command-line override.
+      Burn maps command-line arguments of the form VAR=value to bundle Variables.
+      Default "0" means the custom action fires only when the runtime is absent.
+    -->
+    <Variable Name="FORCEDOTNETINSTALL" Value="0" Type="string" bal:Overridable="yes" />
+
     <!-- WixStdBA: license confirmation dialog showing the MIT license text inline -->
     <BootstrapperApplication>
       <bal:WixStandardBootstrapperApplication
@@ -24,7 +31,17 @@
     <Chain>
       <!-- ── Main MSI (per-user, no elevation) ── -->
       <MsiPackage SourceFile="$(var.EscapeGameKiosk.Installer.TargetPath)"
-        EnableFeatureSelection="no" />
+        EnableFeatureSelection="no">
+        <!--
+          Forward the FORCEDOTNETINSTALL bundle variable to the MSI as a public
+          property so the dotnet-install.ps1 custom action condition can read it.
+          Pass FORCEDOTNETINSTALL=1 on the bundle command line to force the
+          private runtime download even when DotNetCompatibilityCheck detects a
+          system-wide runtime (useful for testing on dev machines).
+        -->
+        <MsiProperty Name="FORCEDOTNETINSTALL" Value="[FORCEDOTNETINSTALL]" />
+      </MsiPackage>
     </Chain>
   </Bundle>
+
 </Wix>

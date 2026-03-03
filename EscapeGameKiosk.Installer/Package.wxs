@@ -1,5 +1,7 @@
 <Wix xmlns="http://wixtoolset.org/schemas/v4/wxs"
-  xmlns:ui="http://wixtoolset.org/schemas/v4/wxs/ui">
+  xmlns:ui="http://wixtoolset.org/schemas/v4/wxs/ui"
+  xmlns:netfx="http://wixtoolset.org/schemas/v4/wxs/netfx"
+  xmlns:util="http://wixtoolset.org/schemas/v4/wxs/util">
 
   <!--
     Id="EscapeGameKiosk" is the human-readable UpgradeCode introduced in WiX v6.
@@ -21,6 +23,78 @@
     -->
     <ui:WixUI Id="WixUI_InstallDir"
       InstallDirectory="INSTALLFOLDER" />
+
+    <!--
+      DotNetCompatibilityCheck queries the installed .NET runtimes.
+      Property DOTNETRUNTIMECHECK is set to:
+        "0" if NO compatible runtime is found
+        "1" if a compatible runtime IS found
+
+      RollForward="latestMajor" accepts 10.x and any later major version.
+      RuntimeType="desktop" targets Microsoft.WindowsDesktop.App (WPF/WinForms).
+    -->
+    <netfx:DotNetCompatibilityCheck
+      Property="DOTNETRUNTIMECHECK"
+      RollForward="latestMajor"
+      RuntimeType="desktop"
+      Platform="x64"
+      Version="10.0.0" />
+
+    <!--
+      Combined single-session install: downloads dotnet-install.ps1 once to a
+      temp file, then invokes it twice (base runtime first so hostfxr.dll is
+      present, then windowsdesktop to add WPF DLLs), then removes the temp file.
+      -SkipNonVersionedFiles on the second run prevents overwriting root-level
+      files already laid down by the first run.
+
+      SetInstallDotNetRuntimesData is an immediate type-51 CA that sets the
+      MSI property "InstallDotNetRuntimes".  Because the deferred CA shares
+      that name, MSI passes the property value to it automatically as
+      CustomActionData — the mechanism WixQuietExec64 reads for its command.
+
+      IMPORTANT authoring constraints:
+        1. WixQuietExec64 requires the command to start with a quoted application
+           name — "powershell.exe" (with the quotes) is required.
+        2. MSI Formatted strings treat { ... } as conditional blocks: if any
+           [Property] reference inside braces resolves to empty, the entire
+           block is dropped.  Do NOT wrap the command in a PowerShell scriptblock
+           brace { ... }.
+        3. For the same reason, avoid [Type]::Method() syntax inside the Value —
+           use $env:TEMP to build temp paths instead of [System.IO.Path]::GetTempFileName().
+        4. [INSTALLFOLDER] IS intentionally resolved by Formatted processing;
+           all other [ ] in the string are escaped with \[ if they should be
+           literal brackets.
+    -->
+    <CustomAction Id="SetInstallDotNetRuntimesData"
+      Property="InstallDotNetRuntimes"
+      Value="&quot;powershell.exe&quot; -NoProfile -ExecutionPolicy Bypass -Command &quot;$tmp = $env:TEMP + '\dotnet-install.ps1'; Invoke-WebRequest -Uri 'https://dot.net/v1/dotnet-install.ps1' -OutFile $tmp -UseBasicParsing; &amp; $tmp -Runtime dotnet -Channel 10.0 -InstallDir '[INSTALLFOLDER]' -NoPath -SkipNonVersionedFiles; &amp; $tmp -Runtime windowsdesktop -Channel 10.0 -InstallDir '[INSTALLFOLDER]' -NoPath -SkipNonVersionedFiles; Remove-Item $tmp -Force&quot;" />
+
+    <!-- Deferred CA: runs PowerShell; reads command from CustomActionData (= above property) -->
+    <CustomAction Id="InstallDotNetRuntimes"
+      BinaryRef="Wix4UtilCA_X64"
+      DllEntry="WixQuietExec64"
+      Execute="deferred"
+      Impersonate="yes"
+      Return="check" />
+
+    <!--
+      FORCEDOTNETINSTALL: pass FORCEDOTNETINSTALL=1 on the installer command line
+      to run dotnet-install.ps1 even when DotNetCompatibilityCheck reports a
+      compatible runtime present (useful for testing on dev machines).
+    -->
+    <Property Id="FORCEDOTNETINSTALL" Value="0" />
+
+    <InstallExecuteSequence>
+      <!-- Set CustomActionData for the deferred CA.
+           Fires on fresh install when: runtime absent OR override requested. -->
+      <Custom Action="SetInstallDotNetRuntimesData"
+        After="InstallFiles"
+        Condition="(NOT DOTNETRUNTIMECHECK OR FORCEDOTNETINSTALL = &quot;1&quot;) AND NOT Installed" />
+      <!-- Run the download-and-install after the property is set -->
+      <Custom Action="InstallDotNetRuntimes"
+        After="SetInstallDotNetRuntimesData"
+        Condition="(NOT DOTNETRUNTIMECHECK OR FORCEDOTNETINSTALL = &quot;1&quot;) AND NOT Installed" />
+    </InstallExecuteSequence>
 
     <!-- ARP icon -->
     <Icon Id="AppIcon.ico"

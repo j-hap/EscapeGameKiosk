@@ -41,19 +41,31 @@
     # Check an already-installed application
     .\Test-InstallerWorkflow.ps1
 
+.PARAMETER ForceDotNetInstall
+    Pass FORCEDOTNETINSTALL=1 to the bundle/MSI so the dotnet-install.ps1 custom
+    action fires even when DotNetCompatibilityCheck detects a system-wide runtime.
+    Use this on developer machines to verify the private-runtime download path.
+
 .EXAMPLE
     # Install silently, run checks, then uninstall
     .\Test-InstallerWorkflow.ps1 `
         -InstallerPath ".\EscapeGameKiosk.Bundle\bin\Release\EscapeGameKioskSetup.exe" `
         -Uninstall
+
+.EXAMPLE
+    # Force the dotnet-install.ps1 path even with a system runtime present
+    .\Test-InstallerWorkflow.ps1 `
+        -InstallerPath ".\EscapeGameKiosk.Bundle\bin\Release\EscapeGameKioskSetup.exe" `
+        -ForceDotNetInstall
 #>
 [CmdletBinding()]
 param(
   [string] $InstallerPath = '',
   [string] $InstallDir = (Join-Path $env:LOCALAPPDATA 'Programs\EscapeGameKiosk'),
   [switch] $Uninstall,
+  [switch] $ForceDotNetInstall,
   [int]    $InstallTimeoutSeconds = 300,
-  [int]    $StartupGracePeriodSeconds = 4
+  [int]    $StartupGracePeriodSeconds = 10
 )
 
 Set-StrictMode -Version Latest
@@ -110,8 +122,13 @@ if ($InstallerPath -eq '') {
   #   /norestart   — suppress any reboot prompts
   # These flags are passed to the Burn engine directly; WixStdBA is not shown.
   $installerResolved = (Resolve-Path $InstallerPath).Path
+  $installArgs = [System.Collections.Generic.List[string]]@('/quiet', '/norestart')
+  if ($ForceDotNetInstall) {
+    $installArgs.Add('FORCEDOTNETINSTALL=1')
+    Write-Host '  [INFO] FORCEDOTNETINSTALL=1 — dotnet-install.ps1 will run regardless of detected runtime' -ForegroundColor Yellow
+  }
   Invoke-SilentProcess -exe $installerResolved `
-    -argList @('/quiet', '/norestart') `
+    -argList $installArgs `
     -timeoutSec $InstallTimeoutSeconds `
     -label 'Bundle installer' | Out-Null
 }
@@ -256,10 +273,33 @@ if (-not (Test-Path $exePath)) {
 } else {
   try {
     Write-Host "  [INFO] Starting process: $exePath" -ForegroundColor Yellow
-    $proc = Start-Process -FilePath $exePath `
-      -WorkingDirectory $InstallDir `
-      -PassThru `
-      -ErrorAction Stop
+
+    # When ForceDotNetInstall is active the private runtime was laid down in
+    # [INSTALLFOLDER] and the system runtime must be hidden so the app is forced
+    # to use it.  Set DOTNET_ROOT_X64 / DOTNET_ROOT to a non-existent path in
+    # the current process immediately before Start-Process; the child inherits
+    # this environment at launch.  Restore them right after Start-Process returns
+    # (the child's environment is already fixed at that point).
+    $savedRootX64 = $env:DOTNET_ROOT_X64
+    $savedRoot = $env:DOTNET_ROOT
+    if ($ForceDotNetInstall) {
+      $env:DOTNET_ROOT_X64 = Join-Path $InstallDir 'nonexistent-dotnet-root'
+      $env:DOTNET_ROOT = $env:DOTNET_ROOT_X64
+      Write-Host "  [INFO] Launch env: DOTNET_ROOT_X64/DOTNET_ROOT → nonexistent path (forcing app-local runtime)" -ForegroundColor Yellow
+    }
+
+    try {
+      $proc = Start-Process -FilePath $exePath `
+        -WorkingDirectory $InstallDir `
+        -PassThru `
+        -ErrorAction Stop
+    } finally {
+      # Restore immediately — child process environment is already captured.
+      if ($null -eq $savedRootX64) { Remove-Item Env:DOTNET_ROOT_X64 -ErrorAction SilentlyContinue }
+      else { $env:DOTNET_ROOT_X64 = $savedRootX64 }
+      if ($null -eq $savedRoot) { Remove-Item Env:DOTNET_ROOT -ErrorAction SilentlyContinue }
+      else { $env:DOTNET_ROOT = $savedRoot }
+    }
 
     Write-Host "  [INFO] Waiting ${StartupGracePeriodSeconds}s for process PID $($proc.Id)..." -ForegroundColor Yellow
     Start-Sleep -Seconds $StartupGracePeriodSeconds

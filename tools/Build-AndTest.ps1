@@ -7,7 +7,7 @@
     2. Runs Test-InstallerWorkflow.ps1 with the freshly-built bundle.
        - Installs silently.
        - Checks files, runtime, and app launch.
-       - Uninstalls silently.
+       - Optionally uninstalls silently (-Uninstall).
 
     FORCING A PRIVATE RUNTIME INSTALL
     ──────────────────────────────────
@@ -16,31 +16,39 @@
     the actual download-and-install code path even on a developer machine that has
     the runtime globally installed, use -ForcePrivateRuntime.
 
-    The trick: DotNetCompatibilityCheck probes for the runtime using the same
-    environment-variable-first order as the .NET app host:
-      1. DOTNET_ROOT_X64  (x64 Windows)
-      2. DOTNET_ROOT
-      3. System paths (%ProgramFiles%\dotnet, %LocalAppData%\Microsoft\dotnet)
+    This has two effects:
 
-    Setting DOTNET_ROOT_X64 and DOTNET_ROOT to a path that contains no runtime
-    causes the check to report "not found" (property DOTNETRUNTIMECHECK = 0) even
-    though a global runtime exists.  Because those env vars are set in this script's
-    process before Start-Process launches the installer, they are inherited through:
-      this script → Burn bundle → msiexec → custom action subprocess
+    1. FORCEDOTNETINSTALL=1 is passed on the Burn command line.  The MSI custom
+       action condition is (NOT DOTNETRUNTIMECHECK OR FORCEDOTNETINSTALL="1"), so
+       dotnet-install.ps1 runs and lays down a private runtime in [INSTALLFOLDER]
+       regardless of what DotNetCompatibilityCheck found.
 
-    The system installation at %ProgramFiles%\dotnet is never touched.
-    After the test the env vars are restored to their original values.
+    2. When launching the app in the post-install test (section 4), DOTNET_ROOT_X64
+       and DOTNET_ROOT are pointed at a non-existent path for the duration of
+       Start-Process so the app host cannot fall back to the system runtime.  Only
+       the private host\fxr\ tree next to the .exe is visible.  The env vars are
+       restored to their original values immediately after Start-Process returns
+       (the child process environment is already captured at that point).
 
 .PARAMETER Configuration
     MSBuild configuration.  Default: Release.
 
 .PARAMETER ForcePrivateRuntime
-    Set DOTNET_ROOT_X64 / DOTNET_ROOT to an empty temp directory before running
-    the installer so DotNetCompatibilityCheck always reports the runtime as absent,
-    forcing the dotnet-install.ps1 download path to execute.
+    Two effects:
+    1. Passes FORCEDOTNETINSTALL=1 to the installer so dotnet-install.ps1 runs
+       and lays down a private runtime in [INSTALLFOLDER] even when a system-wide
+       .NET 10 runtime is already present.
+    2. Hides the system runtime from the app during the launch test by pointing
+       DOTNET_ROOT_X64 / DOTNET_ROOT at a non-existent path for the duration of
+       Start-Process, forcing the app to use only the private host\fxr\ tree.
 
 .PARAMETER SkipBuild
     Skip the build step (use the last build output as-is).
+
+.PARAMETER Uninstall
+    Forwarded to Test-InstallerWorkflow.ps1.  When specified, the bundle
+    uninstaller is run silently after all checks, and removal of [InstallDir]
+    is verified.
 
 .PARAMETER StartupGracePeriodSeconds
     Forwarded to Test-InstallerWorkflow.ps1.  Default: 4.
@@ -52,12 +60,17 @@
 .EXAMPLE
     # Build and test; always exercise the dotnet-install.ps1 download path
     .\tools\Build-AndTest.ps1 -ForcePrivateRuntime
+
+.EXAMPLE
+    # Full end-to-end including uninstall (suitable for CI)
+    .\tools\Build-AndTest.ps1 -ForcePrivateRuntime -Uninstall
 #>
 [CmdletBinding()]
 param(
   [string] $Configuration = 'Release',
   [switch] $ForcePrivateRuntime,
   [switch] $SkipBuild,
+  [switch] $Uninstall,
   [int]    $StartupGracePeriodSeconds = 4
 )
 
@@ -112,27 +125,13 @@ if (-not (Test-Path $bundleExe)) {
 }
 Info "Bundle: $bundleExe"
 
-# ── Step 2: Optionally spoof env vars to force private runtime install ────────
-
-$savedRootX64 = $env:DOTNET_ROOT_X64
-$savedRoot = $env:DOTNET_ROOT
-$fakeDotnetDir = $null
+# ── Step 2: Report runtime detection mode ────────────────────────────────────
 
 if ($ForcePrivateRuntime) {
-  Step 'Isolating runtime detection (ForcePrivateRuntime)'
-
-  # Create an empty directory.  DotNetCompatibilityCheck will find no runtime
-  # here and set DOTNETRUNTIMECHECK = 0, which triggers the custom action.
-  $fakeDotnetDir = Join-Path ([System.IO.Path]::GetTempPath()) "dotnet-test-empty-$(New-Guid)"
-  New-Item -ItemType Directory -Path $fakeDotnetDir | Out-Null
-
-  $env:DOTNET_ROOT_X64 = $fakeDotnetDir
-  $env:DOTNET_ROOT = $fakeDotnetDir
-
-  Info "DOTNET_ROOT_X64 → $fakeDotnetDir"
-  Info "DOTNET_ROOT     → $fakeDotnetDir"
+  Step 'Forcing private runtime install (ForcePrivateRuntime)'
+  Info 'FORCEDOTNETINSTALL=1 will be passed to the installer'
+  Info 'dotnet-install.ps1 will run and lay down a private runtime in [INSTALLFOLDER]'
   Info 'System runtime at %ProgramFiles%\dotnet is NOT touched'
-  Info 'dotnet-install.ps1 will download and install a private runtime into [INSTALLFOLDER]'
 } else {
   Step 'Runtime detection (system runtime used if present)'
   Info 'Use -ForcePrivateRuntime to always exercise the dotnet-install.ps1 code path'
@@ -142,30 +141,10 @@ if ($ForcePrivateRuntime) {
 
 Step 'Running Test-InstallerWorkflow.ps1'
 
-try {
-  & $testScript `
-    -InstallerPath             $bundleExe `
-    -StartupGracePeriodSeconds $StartupGracePeriodSeconds
-  # -Uninstall
+& $testScript `
+  -InstallerPath             $bundleExe `
+  -StartupGracePeriodSeconds $StartupGracePeriodSeconds `
+  -ForceDotNetInstall:$ForcePrivateRuntime `
+  -Uninstall:$Uninstall
 
-  $testExitCode = $LASTEXITCODE
-} finally {
-  # ── Restore env vars and clean up the fake dotnet dir ─────────────────────
-  if ($ForcePrivateRuntime) {
-    Step 'Restoring environment'
-
-    if ($null -eq $savedRootX64) { Remove-Item Env:DOTNET_ROOT_X64 -ErrorAction SilentlyContinue }
-    else { $env:DOTNET_ROOT_X64 = $savedRootX64 }
-
-    if ($null -eq $savedRoot) { Remove-Item Env:DOTNET_ROOT -ErrorAction SilentlyContinue }
-    else { $env:DOTNET_ROOT = $savedRoot }
-
-    if ($fakeDotnetDir -and (Test-Path $fakeDotnetDir)) {
-      Remove-Item -Recurse -Force $fakeDotnetDir -ErrorAction SilentlyContinue
-    }
-
-    Info 'DOTNET_ROOT_X64 and DOTNET_ROOT restored'
-  }
-}
-
-exit $testExitCode
+exit $LASTEXITCODE
