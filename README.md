@@ -20,10 +20,9 @@ dotnet build .\EscapeGameKiosk.sln
 cd .\EscapeGameKiosk
 DOTNET_ENVIRONMENT=Development dotnet run -c Debug
 ```
-The project includes a `Properties\launchSettings.json` that passes `--config appsettings.json`,
-so `dotnet run` automatically loads the in-tree `appsettings.json` instead of looking in
-`%APPDATA%`. The same applies to the Configurator project.
-If you don’t want to `cd`, you can run:
+`Properties\launchSettings.json` passes `--config appsettings.json` so `dotnet run` uses the in-tree
+config file instead of `%APPDATA%` (see [Configuration](#configuration)). The same applies to the
+Configurator project. If you don't want to `cd`, you can run:
 
 ```
 dotnet run --project .\EscapeGameKiosk -c Debug
@@ -49,12 +48,10 @@ target machine.
 
 ### Prerequisites on the target machine
 
-The installer does not bundle the runtimes. Both must be present before running the app:
-
-| Requirement                                                                                 | Notes                                                                                                                              |
-| ------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------- |
-| [.NET 10 Windows Desktop Runtime (x64)](https://dotnet.microsoft.com/download/dotnet/10.0)  | **Must be installed manually if absent.** The installer will place the app files but the app will not launch without this runtime. |
-| [Microsoft Edge WebView2 Runtime](https://developer.microsoft.com/microsoft-edge/webview2/) | Pre-installed on Windows 10 21H2+ and all Windows 11 versions. No action needed on modern machines.                                |
+| Requirement                                                                                 | Notes                                                                                                                                                                                                                                                                                                    |
+| ------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| [.NET 10 Windows Desktop Runtime (x64)](https://dotnet.microsoft.com/download/dotnet/10.0)  | **Downloaded and installed automatically** if absent. Requires an internet connection during setup — the installer fetches `dotnet-install.ps1` from `https://dot.net/v1/` and installs the runtime into the app folder. If the machine is offline, install the runtime manually before running the app. |
+| [Microsoft Edge WebView2 Runtime](https://developer.microsoft.com/microsoft-edge/webview2/) | Pre-installed on Windows 10 21H2+ and all Windows 11 versions. No action needed on modern machines.                                                                                                                                                                                                      |
 
 ### Build
 
@@ -128,10 +125,10 @@ dotnet run --project .\EscapeGameKiosk.Configurator -c Debug
 
 ### What it edits
 
-The configurator reads and writes `%APPDATA%\EscapeGameKiosk\appsettings.json` — the same file
-the kiosk reads at startup. It only updates the `AppSettings` section; other sections (e.g.
-`Logging`) are preserved. If the file does not exist the configurator creates it (including the
-parent directory) when **Save** is pressed.
+The configurator reads and writes `%APPDATA%\EscapeGameKiosk\appsettings.json` — the same file the
+kiosk reads at startup. It only updates the `AppSettings` section; other sections (e.g. `Logging`)
+are preserved. If the file does not exist the configurator creates it (including the parent
+directory) when **Save** is pressed.
 
 | Field          | Description                                                                                            |
 | -------------- | ------------------------------------------------------------------------------------------------------ |
@@ -161,14 +158,25 @@ exit the app without launching the kiosk.
 
 ## Configuration
 
-Edit `appsettings.json`:
+The app resolves its settings file using this priority order:
+
+1. `--config <path>` command-line argument (absolute or relative to the working directory).
+2. `%APPDATA%\EscapeGameKiosk\appsettings.json` — the default location used by the installed app.
+
+In development, `Properties\launchSettings.json` passes `--config appsettings.json` so the in-tree
+file is used automatically by `dotnet run`. The installed app always falls back to
+`%APPDATA%\EscapeGameKiosk\appsettings.json`.
+
+Use the **Configurator** (see [Configurator](#configurator)) to edit settings via GUI. To edit
+manually, open `%APPDATA%\EscapeGameKiosk\appsettings.json` in a text editor.
 
 The app reads settings from the `AppSettings` section:
 
-- `AppSettings:Password`: The unlock password.
-- `AppSettings:VideoPath`: Path to a local video file OR a YouTube URL. - Relative file paths are
-	resolved from the EXE directory.
-- `AppSettings:AllowKeyboardHook`: Enable the keyboard hook that blocks common OS shortcuts.
+| Key                             | Type   | Description                                                                   |
+| ------------------------------- | ------ | ----------------------------------------------------------------------------- |
+| `AppSettings:Password`          | string | Password required to exit the kiosk.                                          |
+| `AppSettings:VideoPath`         | string | Path to a local video file (e.g. `C:\Videos\intro.mp4`) or a YouTube URL.     |
+| `AppSettings:AllowKeyboardHook` | bool   | Enable the keyboard hook that blocks common OS shortcuts. Defaults to `true`. |
 
 ## Hidden Exit
 

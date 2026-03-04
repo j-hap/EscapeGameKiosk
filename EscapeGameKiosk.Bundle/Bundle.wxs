@@ -5,8 +5,9 @@
     Bundle Id="EscapeGameKiosk.Bundle": human-readable UpgradeCode (WiX v6).
     The bundle UpgradeCode must differ from the MSI UpgradeCode, hence the suffix.
 
-    Prerequisites (.NET 10 Desktop Runtime, WebView2) are NOT bootstrapped by this
-    bundle — they must be present on the target machine before installation.
+    .NET 10 Desktop Runtime: installed on demand by a deferred MSI custom action
+    (dotnet-install.ps1 fetched from https://dot.net/v1/) when absent — requires
+    internet access during setup.  WebView2 must be present on the target machine.
     See README.md § Prerequisites for details.
   -->
   <Bundle Name="EscapeGameKiosk"
