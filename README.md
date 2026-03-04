@@ -87,13 +87,61 @@ choose **Uninstall**.
 
 ### Configuration after install
 
-Edit `appsettings.json` in the install folder before (or after) running the app:
+Use the **Configurator** app (see [Configurator](#configurator)) or edit `appsettings.json`
+directly in the install folder:
 
 ```
 %LOCALAPPDATA%\Programs\EscapeGameKiosk\appsettings.json
 ```
 
 See the [Configuration](#configuration) section for available settings.
+
+## Configurator
+
+`EscapeGameKioskConfigurator.exe` is a small companion utility that ships alongside the kiosk app.
+It provides a simple GUI for editing the two settings that need to change between escape-room
+sessions — the video source and the exit password — without touching JSON by hand.
+
+### Running the Configurator
+
+After installation the configurator appears in the same Start Menu folder as the kiosk:
+
+**Start → EscapeGameKiosk → EscapeGameKiosk Configurator**
+
+Or launch it directly:
+
+```
+%LOCALAPPDATA%\Programs\EscapeGameKiosk\EscapeGameKioskConfigurator.exe
+```
+
+During development:
+
+```powershell
+dotnet run --project .\EscapeGameKiosk.Configurator -c Debug
+```
+
+### What it edits
+
+The configurator reads and writes `appsettings.json` next to its own executable — the same file the
+kiosk reads at startup. It only updates the `AppSettings` section; other sections (e.g. `Logging`)
+are preserved.
+
+| Field | Description |
+|---|---|
+| **Path / URL** | Local video file path (e.g. `C:\Videos\intro.mp4`) or a web URL. Use **Browse…** to pick a local file. |
+| **Password** | Password required to exit the kiosk. Click **Show** to reveal it while typing. |
+
+### Buttons
+
+| Button | Action |
+|---|---|
+| **Browse…** | Opens a file-picker pre-seeded with the current path (if the file exists). |
+| **Show** | Toggles password visibility. |
+| **Reload** | Discards unsaved changes and reloads from disk. |
+| **Save** | Writes changes to `appsettings.json`. The status bar (bottom-left) confirms success or shows an error. |
+
+The status bar also shows the full path of the config file being edited, so it is always clear which
+installation is being configured when multiple environments exist side-by-side.
 
 ## Touchpad gesture check on startup
 

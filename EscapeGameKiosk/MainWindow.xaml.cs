@@ -49,7 +49,7 @@ public partial class MainWindow : Window
   {
     try
     {
-      var svgUri = new Uri("pack://application:,,,/Assets/logo.svg");
+      var svgUri = new Uri("pack://application:,,,/Assets/lock.svg");
       var streamInfo = Application.GetResourceStream(svgUri);
       if (streamInfo is null) return;
 

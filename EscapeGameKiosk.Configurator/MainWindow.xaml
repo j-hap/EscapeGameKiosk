@@ -1,0 +1,162 @@
+<Window x:Class="EscapeGameKiosk.Configurator.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="EscapeGameKiosk – Configuration"
+        Width="520"
+    Height="310"
+        MinWidth="420"
+    MinHeight="280"
+        ResizeMode="CanMinimize"
+        WindowStartupLocation="CenterScreen"
+        Background="#F5F5F5">
+
+  <Window.Resources>
+    <Style TargetType="Label">
+      <Setter Property="VerticalAlignment"
+          Value="Center"/>
+      <Setter Property="FontSize"
+          Value="13"/>
+      <Setter Property="Foreground"
+          Value="#333333"/>
+    </Style>
+    <Style TargetType="TextBox">
+      <Setter Property="Height"
+          Value="28"/>
+      <Setter Property="VerticalContentAlignment"
+          Value="Center"/>
+      <Setter Property="Padding"
+          Value="4,0"/>
+      <Setter Property="FontSize"
+          Value="13"/>
+      <Setter Property="BorderBrush"
+          Value="#AAAAAA"/>
+    </Style>
+    <Style TargetType="PasswordBox">
+      <Setter Property="Height"
+          Value="28"/>
+      <Setter Property="VerticalContentAlignment"
+          Value="Center"/>
+      <Setter Property="Padding"
+          Value="4,0"/>
+      <Setter Property="FontSize"
+          Value="13"/>
+      <Setter Property="BorderBrush"
+          Value="#AAAAAA"/>
+    </Style>
+    <Style TargetType="Button">
+      <Setter Property="Height"
+          Value="28"/>
+      <Setter Property="Padding"
+          Value="12,0"/>
+      <Setter Property="FontSize"
+          Value="13"/>
+      <Setter Property="Cursor"
+          Value="Hand"/>
+    </Style>
+  </Window.Resources>
+
+  <Grid Margin="20">
+    <Grid.RowDefinitions>
+      <RowDefinition Height="Auto"/>
+      <RowDefinition Height="16"/>
+      <RowDefinition Height="Auto"/>
+      <RowDefinition Height="16"/>
+      <RowDefinition Height="Auto"/>
+      <RowDefinition Height="*"/>
+      <RowDefinition Height="Auto"/>
+    </Grid.RowDefinitions>
+
+    <!-- Video Source -->
+    <GroupBox Grid.Row="0"
+        Header="Video Source"
+        Padding="8,6"
+        FontSize="13">
+      <Grid>
+        <Grid.ColumnDefinitions>
+          <ColumnDefinition Width="80"/>
+          <ColumnDefinition Width="*"/>
+          <ColumnDefinition Width="8"/>
+          <ColumnDefinition Width="Auto"/>
+        </Grid.ColumnDefinitions>
+        <Label Grid.Column="0"
+            Content="Path / URL:"/>
+        <TextBox Grid.Column="1"
+            x:Name="VideoPathBox"
+                 ToolTip="Local file path (e.g. C:\Videos\intro.mp4) or a web URL"/>
+        <Button Grid.Column="3"
+            Content="Browse…"
+            Click="BrowseVideo_Click"
+                ToolTip="Select a local video file"/>
+      </Grid>
+    </GroupBox>
+
+    <!-- Password -->
+    <GroupBox Grid.Row="2"
+        Header="Access Lock"
+        Padding="8,6"
+        FontSize="13">
+      <Grid>
+        <Grid.ColumnDefinitions>
+          <ColumnDefinition Width="80"/>
+          <ColumnDefinition Width="*"/>
+          <ColumnDefinition Width="8"/>
+          <ColumnDefinition Width="Auto"/>
+        </Grid.ColumnDefinitions>
+        <Label Grid.Column="0"
+            Content="Password:"/>
+        <PasswordBox Grid.Column="1"
+            x:Name="PasswordBox"
+                     ToolTip="Password required to exit the kiosk"/>
+        <ToggleButton Grid.Column="3"
+            x:Name="ShowPasswordToggle"
+                      Content="Show"
+            Height="28"
+            Padding="8,0"
+            FontSize="13"
+                      Cursor="Hand"
+                      Checked="ShowPassword_Checked"
+                      Unchecked="ShowPassword_Unchecked"
+                      ToolTip="Toggle password visibility"/>
+      </Grid>
+    </GroupBox>
+
+    <!-- Config file location hint -->
+    <TextBlock Grid.Row="4"
+        x:Name="ConfigPathHint"
+               FontSize="11"
+        Foreground="#888888"
+        TextWrapping="Wrap"
+               VerticalAlignment="Center"/>
+
+    <!-- Bottom bar -->
+    <Grid Grid.Row="6">
+      <Grid.ColumnDefinitions>
+        <ColumnDefinition Width="*"/>
+        <ColumnDefinition Width="Auto"/>
+        <ColumnDefinition Width="8"/>
+        <ColumnDefinition Width="Auto"/>
+      </Grid.ColumnDefinitions>
+
+      <TextBlock x:Name="StatusText"
+          Grid.Column="0"
+                 VerticalAlignment="Center"
+          FontSize="12"
+                 Foreground="#555555"
+          TextWrapping="Wrap"/>
+
+      <Button Grid.Column="1"
+          Content="Reload"
+          Click="Reload_Click"
+              ToolTip="Discard unsaved changes and reload from disk"/>
+      <Button Grid.Column="3"
+          Content="Save"
+          Click="Save_Click"
+              FontWeight="SemiBold"
+              Background="#1976D2"
+          Foreground="White"
+          BorderBrush="#1565C0"
+              ToolTip="Save changes to appsettings.json"/>
+    </Grid>
+
+  </Grid>
+</Window>

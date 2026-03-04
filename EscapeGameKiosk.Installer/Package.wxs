@@ -134,6 +134,20 @@
           Value="1"
           KeyPath="yes" />
       </Component>
+      <Component Id="ConfiguratorShortcut" Guid="*">
+        <Shortcut Id="ConfiguratorStartMenu"
+          Name="EscapeGameKiosk Configurator"
+          Target="[INSTALLFOLDER]EscapeGameKioskConfigurator.exe"
+          WorkingDirectory="INSTALLFOLDER"
+          Icon="AppIcon.ico" />
+        <!-- Separate registry keypath for the configurator shortcut component -->
+        <RegistryValue Root="HKCU"
+          Key="Software\EscapeGameKiosk"
+          Name="configurator_installed"
+          Type="integer"
+          Value="1"
+          KeyPath="yes" />
+      </Component>
     </ComponentGroup>
 
     <!--
@@ -145,8 +159,26 @@
       <Files Include="$(var.AppPublishDir)**\*" />
     </ComponentGroup>
 
+    <!--
+      Configurator files land directly in INSTALLFOLDER alongside the kiosk app.
+      The configurator has no NuGet dependencies (System.Text.Json ships with the
+      framework) so its publish output is only four uniquely-named files:
+        EscapeGameKioskConfigurator.exe / .dll / .deps.json / .runtimeconfig.json
+      There are no filename collisions with the main app.
+
+      Placing both executables in the same directory is required for the .NET
+      apphost runtime-probing algorithm: when the installer downloads a private
+      runtime via dotnet-install.ps1 into INSTALLFOLDER, the apphost of each
+      exe resolves hostfxr.dll by searching its own sibling directory first.
+      A sub-directory would break that search for the configurator.
+    -->
+    <ComponentGroup Id="ConfiguratorFiles" Directory="INSTALLFOLDER">
+      <Files Include="$(var.ConfiguratorPublishDir)**\*" />
+    </ComponentGroup>
+
     <Feature Id="Main">
       <ComponentGroupRef Id="AppFiles" />
+      <ComponentGroupRef Id="ConfiguratorFiles" />
       <ComponentGroupRef Id="Shortcuts" />
     </Feature>
 

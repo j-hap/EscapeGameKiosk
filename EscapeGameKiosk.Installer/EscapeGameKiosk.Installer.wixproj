@@ -51,14 +51,19 @@
          Platform=x64 (inherited by the ProjectReference) puts the output under
          bin\x64\Release\, not bin\Release\. -->
     <AppPublishDir>$(MSBuildThisFileDirectory)..\EscapeGameKiosk\bin\x64\Release\net10.0-windows\win-x64\publish\</AppPublishDir>
-    <!-- Forward AppPublishDir and Version to the WiX preprocessor -->
-    <DefineConstants>AppPublishDir=$(AppPublishDir);Version=$(Version)</DefineConstants>
+    <!-- Configurator publish output (installed into a 'configurator' subfolder) -->
+    <ConfiguratorPublishDir>$(MSBuildThisFileDirectory)..\EscapeGameKiosk.Configurator\bin\x64\Release\net10.0-windows\win-x64\publish\</ConfiguratorPublishDir>
+    <!-- Forward AppPublishDir, ConfiguratorPublishDir and Version to the WiX preprocessor -->
+    <DefineConstants>AppPublishDir=$(AppPublishDir);ConfiguratorPublishDir=$(ConfiguratorPublishDir);Version=$(Version)</DefineConstants>
   </PropertyGroup>
 
-  <!-- Build the app before the installer — Targets="Publish" ensures the
+  <!-- Build both apps before the installer — Targets="Publish" ensures the
        publish\ folder is populated (plain Build does not create it). -->
   <ItemGroup>
     <ProjectReference Include="..\EscapeGameKiosk\EscapeGameKiosk.csproj"
+                      AdditionalProperties="RuntimeIdentifier=win-x64;SelfContained=false;Configuration=Release"
+                      Targets="Publish" />
+    <ProjectReference Include="..\EscapeGameKiosk.Configurator\EscapeGameKiosk.Configurator.csproj"
                       AdditionalProperties="RuntimeIdentifier=win-x64;SelfContained=false;Configuration=Release"
                       Targets="Publish" />
   </ItemGroup>

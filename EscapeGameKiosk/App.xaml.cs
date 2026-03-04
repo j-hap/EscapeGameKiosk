@@ -141,8 +141,11 @@ public partial class App : Application
         logging.AddDebug();
         logging.SetMinimumLevel(LogLevel.Debug);
 
-        // Add file logging
-        var logPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "logs", "log.txt");
+        // Add file logging — written to %APPDATA%\EscapeGameKiosk\logs\ so the
+        // install directory (which may be read-only) is never written to at runtime.
+        var logPath = Path.Combine(
+            Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
+            "EscapeGameKiosk", "logs", "log.txt");
         logging.AddFile(logPath, minimumLevel: LogLevel.Information);
       })
       .Build();

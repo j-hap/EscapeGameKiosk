@@ -15,6 +15,8 @@ Project("{B7DD6F7E-DEF8-4E67-B5B7-07EF123DB6F0}") = "EscapeGameKiosk.Installer",
 EndProject
 Project("{B7DD6F7E-DEF8-4E67-B5B7-07EF123DB6F0}") = "EscapeGameKiosk.Bundle", "EscapeGameKiosk.Bundle\EscapeGameKiosk.Bundle.wixproj", "{C117768E-8E0B-42B5-9558-94B4D02E226F}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EscapeGameKiosk.Configurator", "EscapeGameKiosk.Configurator\EscapeGameKiosk.Configurator.csproj", "{3A7F1D2E-8C94-4B56-9E32-1F0A7D5C8B4E}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -97,6 +99,18 @@ Global
 		{C117768E-8E0B-42B5-9558-94B4D02E226F}.Release|x64.Build.0 = Release|Any CPU
 		{C117768E-8E0B-42B5-9558-94B4D02E226F}.Release|x86.ActiveCfg = Release|Any CPU
 		{C117768E-8E0B-42B5-9558-94B4D02E226F}.Release|x86.Build.0 = Release|Any CPU
+		{3A7F1D2E-8C94-4B56-9E32-1F0A7D5C8B4E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3A7F1D2E-8C94-4B56-9E32-1F0A7D5C8B4E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3A7F1D2E-8C94-4B56-9E32-1F0A7D5C8B4E}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{3A7F1D2E-8C94-4B56-9E32-1F0A7D5C8B4E}.Debug|x64.Build.0 = Debug|Any CPU
+		{3A7F1D2E-8C94-4B56-9E32-1F0A7D5C8B4E}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{3A7F1D2E-8C94-4B56-9E32-1F0A7D5C8B4E}.Debug|x86.Build.0 = Debug|Any CPU
+		{3A7F1D2E-8C94-4B56-9E32-1F0A7D5C8B4E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3A7F1D2E-8C94-4B56-9E32-1F0A7D5C8B4E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3A7F1D2E-8C94-4B56-9E32-1F0A7D5C8B4E}.Release|x64.ActiveCfg = Release|Any CPU
+		{3A7F1D2E-8C94-4B56-9E32-1F0A7D5C8B4E}.Release|x64.Build.0 = Release|Any CPU
+		{3A7F1D2E-8C94-4B56-9E32-1F0A7D5C8B4E}.Release|x86.ActiveCfg = Release|Any CPU
+		{3A7F1D2E-8C94-4B56-9E32-1F0A7D5C8B4E}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

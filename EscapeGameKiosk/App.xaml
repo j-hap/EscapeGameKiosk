@@ -12,7 +12,7 @@
     <Style x:Key="AppLogoStyle"
            TargetType="{x:Type svgc:SvgViewbox}">
       <Setter Property="Source"
-              Value="pack://application:,,,/Assets/logo.svg"/>
+              Value="pack://application:,,,/Assets/lock.svg"/>
     </Style>
 
     <Style x:Key="OrbitronButtonBaseStyle"
