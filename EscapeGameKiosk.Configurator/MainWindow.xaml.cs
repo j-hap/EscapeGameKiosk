@@ -29,13 +29,24 @@ public partial class MainWindow : Window
 
   /// <summary>
   /// Locates appsettings.json.
-  /// Both the configurator and the kiosk app are installed into the same
-  /// directory, so appsettings.json is always a sibling of this executable.
-  /// During development the file also lives next to the exe in the output dir.
+  /// Priority: --config &lt;path&gt; command-line argument → %APPDATA%\EscapeGameKiosk\appsettings.json.
+  /// Relative paths supplied via --config are resolved against the current working directory.
   /// </summary>
   private static string ResolveSettingsPath()
   {
-    return Path.Combine(AppContext.BaseDirectory, "appsettings.json");
+    string[] args = Environment.GetCommandLineArgs();
+    // args[0] is the exe path; named argument starts at index 1.
+    for (int i = 1; i < args.Length - 1; i++)
+    {
+      if (args[i].Equals("--config", StringComparison.OrdinalIgnoreCase))
+      {
+        string p = args[i + 1];
+        return Path.IsPathRooted(p) ? p : Path.GetFullPath(p);
+      }
+    }
+    return Path.Combine(
+        Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
+        "EscapeGameKiosk", "appsettings.json");
   }
 
   // ──────────────────────────────────────────────────────────────────────────
@@ -49,8 +60,8 @@ public partial class MainWindow : Window
       if (!File.Exists(_settingsPath))
       {
         SetStatus("Config file not found — defaults loaded.", isError: true);
-        VideoPathBox.Text = string.Empty;
-        PasswordBox.Password = string.Empty;
+        VideoPathBox.Text = "https://www.youtube.com/watch?v=dQw4w9WgXcQ";
+        PasswordBox.Password = "admin";
         return;
       }
 

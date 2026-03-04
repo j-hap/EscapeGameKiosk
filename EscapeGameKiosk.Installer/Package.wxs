@@ -156,6 +156,11 @@
       $(var.AppPublishDir) is set as a preprocessor variable via the .wixproj.
     -->
     <ComponentGroup Id="AppFiles" Directory="INSTALLFOLDER">
+      <!--
+        appsettings.json is not published (it lives in %APPDATA%\EscapeGameKiosk\ at
+        runtime and is created by the Configurator on first run), so it will not appear
+        in AppPublishDir and needs no special exclusion here.
+      -->
       <Files Include="$(var.AppPublishDir)**\*" />
     </ComponentGroup>
 

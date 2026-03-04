@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "EscapeGameKiosk": {
+      "commandName": "Project",
+      "commandLineArgs": "--config appsettings.json"
+    }
+  }
+}

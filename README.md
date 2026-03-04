@@ -20,7 +20,9 @@ dotnet build .\EscapeGameKiosk.sln
 cd .\EscapeGameKiosk
 DOTNET_ENVIRONMENT=Development dotnet run -c Debug
 ```
-
+The project includes a `Properties\launchSettings.json` that passes `--config appsettings.json`,
+so `dotnet run` automatically loads the in-tree `appsettings.json` instead of looking in
+`%APPDATA%`. The same applies to the Configurator project.
 If you don’t want to `cd`, you can run:
 
 ```
@@ -87,12 +89,16 @@ choose **Uninstall**.
 
 ### Configuration after install
 
-Use the **Configurator** app (see [Configurator](#configurator)) or edit `appsettings.json`
-directly in the install folder:
+Use the **Configurator** app (see [Configurator](#configurator)) to create and edit the settings
+file on first run. Settings are stored in the user's roaming profile — not in the install folder —
+so they survive upgrades and reinstalls:
 
 ```
-%LOCALAPPDATA%\Programs\EscapeGameKiosk\appsettings.json
+%APPDATA%\EscapeGameKiosk\appsettings.json
 ```
+
+The kiosk will not start if this file is missing; it will show a message directing you to run the
+Configurator first.
 
 See the [Configuration](#configuration) section for available settings.
 
@@ -122,23 +128,24 @@ dotnet run --project .\EscapeGameKiosk.Configurator -c Debug
 
 ### What it edits
 
-The configurator reads and writes `appsettings.json` next to its own executable — the same file the
-kiosk reads at startup. It only updates the `AppSettings` section; other sections (e.g. `Logging`)
-are preserved.
+The configurator reads and writes `%APPDATA%\EscapeGameKiosk\appsettings.json` — the same file
+the kiosk reads at startup. It only updates the `AppSettings` section; other sections (e.g.
+`Logging`) are preserved. If the file does not exist the configurator creates it (including the
+parent directory) when **Save** is pressed.
 
-| Field | Description |
-|---|---|
+| Field          | Description                                                                                            |
+| -------------- | ------------------------------------------------------------------------------------------------------ |
 | **Path / URL** | Local video file path (e.g. `C:\Videos\intro.mp4`) or a web URL. Use **Browse…** to pick a local file. |
-| **Password** | Password required to exit the kiosk. Click **Show** to reveal it while typing. |
+| **Password**   | Password required to exit the kiosk. Click **Show** to reveal it while typing.                         |
 
 ### Buttons
 
-| Button | Action |
-|---|---|
-| **Browse…** | Opens a file-picker pre-seeded with the current path (if the file exists). |
-| **Show** | Toggles password visibility. |
-| **Reload** | Discards unsaved changes and reloads from disk. |
-| **Save** | Writes changes to `appsettings.json`. The status bar (bottom-left) confirms success or shows an error. |
+| Button      | Action                                                                                                 |
+| ----------- | ------------------------------------------------------------------------------------------------------ |
+| **Browse…** | Opens a file-picker pre-seeded with the current path (if the file exists).                             |
+| **Show**    | Toggles password visibility.                                                                           |
+| **Reload**  | Discards unsaved changes and reloads from disk.                                                        |
+| **Save**    | Writes changes to `appsettings.json`. The status bar (bottom-left) confirms success or shows an error. |
 
 The status bar also shows the full path of the config file being edited, so it is always clear which
 installation is being configured when multiple environments exist side-by-side.

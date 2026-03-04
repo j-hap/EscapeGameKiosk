@@ -20,15 +20,52 @@ public partial class App : Application
 {
   private IHost? _host;
 
+  /// <summary>
+  /// Resolves the settings file path.
+  /// Priority: --config &lt;path&gt; command-line argument → %APPDATA%\EscapeGameKiosk\appsettings.json.
+  /// Relative paths supplied via --config are resolved against the current working directory.
+  /// </summary>
+  private static string ResolveSettingsPath(string[] args)
+  {
+    for (int i = 0; i < args.Length - 1; i++)
+    {
+      if (args[i].Equals("--config", StringComparison.OrdinalIgnoreCase))
+      {
+        string p = args[i + 1];
+        return Path.IsPathRooted(p) ? p : Path.GetFullPath(p);
+      }
+    }
+    return Path.Combine(
+        Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
+        "EscapeGameKiosk", "appsettings.json");
+  }
+
   protected override void OnStartup(StartupEventArgs e)
   {
     base.OnStartup(e);
 
+    string settingsPath = ResolveSettingsPath(e.Args);
+
+    // Fail fast with a clear, actionable message rather than a cryptic file-not-found
+    // exception buried inside the DI container build.
+    if (!File.Exists(settingsPath))
+    {
+      MessageBox.Show(
+        $"No configuration file found at:\n{settingsPath}\n\n" +
+        "Run EscapeGameKioskConfigurator.exe to set up the video path and " +
+        "password, then start the kiosk again.",
+        "Configuration Missing \u2014 EscapeGameKiosk",
+        MessageBoxButton.OK,
+        MessageBoxImage.Error);
+      Shutdown(1);
+      return;
+    }
+
     _host = Host.CreateDefaultBuilder()
       .ConfigureAppConfiguration((context, config) =>
       {
-        config.SetBasePath(AppDomain.CurrentDomain.BaseDirectory);
-        config.AddJsonFile("appsettings.json", optional: false, reloadOnChange: true);
+        // Path is absolute; no SetBasePath needed.
+        config.AddJsonFile(settingsPath, optional: false, reloadOnChange: false);
       })
       .ConfigureServices((context, services) =>
       {
