@@ -68,17 +68,31 @@ public partial class MainWindow : Window
       }
 
       string json = File.ReadAllText(_settingsPath);
-      JsonNode root = JsonNode.Parse(json)
-          ?? throw new JsonException("Config file is empty or invalid JSON.");
+      JsonNode root;
+      try
+      {
+        // JsonNode.Parse returns null only for empty/whitespace input; it throws
+        // JsonException for any malformed content, so a try/catch is required —
+        // a null check alone would miss corrupt-but-non-empty files.
+        root = JsonNode.Parse(json)
+            ?? throw new JsonException();
+      }
+      catch (JsonException)
+      {
+        SetStatus("Config file is corrupted — fill in the fields and save to repair it.", isError: true);
+        VideoPathBox.Text = string.Empty;
+        PasswordBox.Password = string.Empty;
+        return;
+      }
 
       JsonNode? appSettings = root[nameof(AppSettings)];
       VideoPathBox.Text = appSettings?[nameof(AppSettings.VideoPath)]?.GetValue<string>() ?? string.Empty;
       PasswordBox.Password = appSettings?[nameof(AppSettings.Password)]?.GetValue<string>() ?? string.Empty;
       SetStatus("Settings loaded.", isError: false);
     }
-    catch (Exception ex)
+    catch (Exception)
     {
-      SetStatus($"Error loading settings: {ex.Message}", isError: true);
+      SetStatus("Could not read the config file — check that it is not locked by another process.", isError: true);
     }
   }
 
@@ -99,20 +113,23 @@ public partial class MainWindow : Window
       }
 
       // Read existing JSON (or start fresh) so we don't discard Logging section etc.
-      JsonNode root;
+      // If the file is corrupt/unparseable we treat it as absent and start fresh.
+      JsonNode root = new JsonObject();
+      string? dir = Path.GetDirectoryName(_settingsPath);
+      if (!string.IsNullOrEmpty(dir))
+        Directory.CreateDirectory(dir);
       if (File.Exists(_settingsPath))
       {
-        string existing = File.ReadAllText(_settingsPath);
-        root = JsonNode.Parse(existing)
-            ?? new JsonObject();
-      }
-      else
-      {
-        root = new JsonObject();
-        // Ensure the parent directory exists
-        string? dir = Path.GetDirectoryName(_settingsPath);
-        if (!string.IsNullOrEmpty(dir))
-          Directory.CreateDirectory(dir);
+        try
+        {
+          string existing = File.ReadAllText(_settingsPath);
+          root = JsonNode.Parse(existing) ?? new JsonObject();
+        }
+        catch (JsonException)
+        {
+          // Corrupt file — start fresh (will overwrite below)
+          root = new JsonObject();
+        }
       }
 
       // Create or update only the AppSettings section

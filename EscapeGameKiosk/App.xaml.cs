@@ -41,7 +41,9 @@ public partial class App : Application
       return;
     }
 
-    _host = Host.CreateDefaultBuilder()
+    try
+    {
+      _host = Host.CreateDefaultBuilder()
       .ConfigureAppConfiguration((context, config) =>
       {
         // Path is absolute; no SetBasePath needed.
@@ -166,6 +168,18 @@ public partial class App : Application
         logging.AddFile(logPath, minimumLevel: LogLevel.Information);
       })
       .Build();
+    }
+    catch (Exception ex) when (ex is System.Text.Json.JsonException or InvalidDataException or FormatException)
+    {
+      MessageBox.Show(
+        $"Configuration file is not valid JSON:\n{settingsPath}\n\n{ex.Message}\n\n" +
+        "Run EscapeGameKioskConfigurator.exe to repair the configuration, then start the kiosk again.",
+        "Configuration Invalid \u2014 EscapeGameKiosk",
+        MessageBoxButton.OK,
+        MessageBoxImage.Error);
+      Shutdown(1);
+      return;
+    }
 
     // Validate configuration before showing MainWindow
     var logger = _host.Services.GetRequiredService<ILogger<App>>();
