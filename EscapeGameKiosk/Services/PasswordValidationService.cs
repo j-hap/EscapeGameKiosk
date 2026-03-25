@@ -11,9 +11,9 @@ public sealed class PasswordValidationService : IPasswordValidationService
   private int _failedAttempts;
 
   public PasswordValidationService(
-    int baseLockoutSeconds = 5,
-    int lockoutStepSeconds = 5,
-    int lockoutThreshold = 3)
+    int baseLockoutSeconds = Constants.Lockout.BaseSeconds,
+    int lockoutStepSeconds = Constants.Lockout.StepSeconds,
+    int lockoutThreshold = Constants.Lockout.Threshold)
   {
     _baseLockoutSeconds = baseLockoutSeconds;
     _lockoutStepSeconds = lockoutStepSeconds;

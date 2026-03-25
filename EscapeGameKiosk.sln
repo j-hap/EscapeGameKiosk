@@ -5,6 +5,8 @@ VisualStudioVersion = 17.5.2.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EscapeGameKiosk", "EscapeGameKiosk\\EscapeGameKiosk.csproj", "{5A6811B4-6FB9-6DE7-AD39-629B2D88E7A2}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EscapeGameKiosk.Core", "EscapeGameKiosk.Core\EscapeGameKiosk.Core.csproj", "{2E4F8A1C-5B3D-4E96-A7F2-0C8D1E3B5A9F}"
+EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EscapeGameKiosk.Tests", "EscapeGameKiosk.Tests\EscapeGameKiosk.Tests.csproj", "{D5D6DCFE-B340-476A-9377-10A66384EA2F}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EscapeGameKiosk.Gestures", "EscapeGameKiosk.Gestures\EscapeGameKiosk.Gestures.csproj", "{0B03A882-8C32-4D4D-8BEA-2F3E2504E6D0}"
@@ -39,6 +41,18 @@ Global
 		{5A6811B4-6FB9-6DE7-AD39-629B2D88E7A2}.Release|x64.Build.0 = Release|Any CPU
 		{5A6811B4-6FB9-6DE7-AD39-629B2D88E7A2}.Release|x86.ActiveCfg = Release|Any CPU
 		{5A6811B4-6FB9-6DE7-AD39-629B2D88E7A2}.Release|x86.Build.0 = Release|Any CPU
+		{2E4F8A1C-5B3D-4E96-A7F2-0C8D1E3B5A9F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2E4F8A1C-5B3D-4E96-A7F2-0C8D1E3B5A9F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2E4F8A1C-5B3D-4E96-A7F2-0C8D1E3B5A9F}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{2E4F8A1C-5B3D-4E96-A7F2-0C8D1E3B5A9F}.Debug|x64.Build.0 = Debug|Any CPU
+		{2E4F8A1C-5B3D-4E96-A7F2-0C8D1E3B5A9F}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{2E4F8A1C-5B3D-4E96-A7F2-0C8D1E3B5A9F}.Debug|x86.Build.0 = Debug|Any CPU
+		{2E4F8A1C-5B3D-4E96-A7F2-0C8D1E3B5A9F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2E4F8A1C-5B3D-4E96-A7F2-0C8D1E3B5A9F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2E4F8A1C-5B3D-4E96-A7F2-0C8D1E3B5A9F}.Release|x64.ActiveCfg = Release|Any CPU
+		{2E4F8A1C-5B3D-4E96-A7F2-0C8D1E3B5A9F}.Release|x64.Build.0 = Release|Any CPU
+		{2E4F8A1C-5B3D-4E96-A7F2-0C8D1E3B5A9F}.Release|x86.ActiveCfg = Release|Any CPU
+		{2E4F8A1C-5B3D-4E96-A7F2-0C8D1E3B5A9F}.Release|x86.Build.0 = Release|Any CPU
 		{D5D6DCFE-B340-476A-9377-10A66384EA2F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{D5D6DCFE-B340-476A-9377-10A66384EA2F}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{D5D6DCFE-B340-476A-9377-10A66384EA2F}.Debug|x64.ActiveCfg = Debug|Any CPU

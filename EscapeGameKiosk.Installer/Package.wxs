@@ -166,10 +166,12 @@
 
     <!--
       Configurator files land directly in INSTALLFOLDER alongside the kiosk app.
-      The configurator has no NuGet dependencies (System.Text.Json ships with the
-      framework) so its publish output is only four uniquely-named files:
+      Only the configurator's own assembly files are listed here:
         EscapeGameKioskConfigurator.exe / .dll / .deps.json / .runtimeconfig.json
-      There are no filename collisions with the main app.
+      Shared dependencies (e.g. EscapeGameKiosk.Core.dll) are already harvested by
+      AppFiles above — including them here would produce duplicate identifiers.
+      If the configurator ever gains NuGet packages not shared with the kiosk,
+      add them explicitly or in a dedicated ComponentGroup.
 
       Placing both executables in the same directory is required for the .NET
       apphost runtime-probing algorithm: when the installer downloads a private
@@ -178,7 +180,7 @@
       A sub-directory would break that search for the configurator.
     -->
     <ComponentGroup Id="ConfiguratorFiles" Directory="INSTALLFOLDER">
-      <Files Include="$(var.ConfiguratorPublishDir)**\*" />
+      <Files Include="$(var.ConfiguratorPublishDir)EscapeGameKioskConfigurator.*" />
     </ComponentGroup>
 
     <Feature Id="Main">

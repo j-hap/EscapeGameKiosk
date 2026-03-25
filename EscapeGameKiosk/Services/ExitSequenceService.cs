@@ -14,8 +14,8 @@ public sealed class ExitSequenceService : IExitSequenceService
 
   public ExitSequenceService(int[]? exitSequence = null, TimeSpan? timeout = null)
   {
-    _exitSequence = exitSequence ?? [0, 2, 1, 3];
-    _timeout = timeout ?? TimeSpan.FromSeconds(4);
+    _exitSequence = exitSequence ?? Constants.Security.DefaultExitSequence;
+    _timeout = timeout ?? TimeSpan.FromSeconds(Constants.Security.ExitTimeoutSeconds);
     _currentProgress = 0;
     _lastTapTime = DateTime.MinValue;
   }
@@ -30,16 +30,16 @@ public sealed class ExitSequenceService : IExitSequenceService
     UpdateTimestamp();
 
     int expectedRegion = _exitSequence[_currentProgress];
-    
+
     if (region == expectedRegion)
     {
       _currentProgress++;
-      
+
       if (_currentProgress >= _exitSequence.Length)
       {
         return true;
       }
-      
+
       return false;
     }
 

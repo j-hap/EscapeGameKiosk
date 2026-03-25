@@ -18,6 +18,10 @@
     Microsoft.Win32.OpenFileDialog is part of WPF (PresentationFramework).
   -->
 
+  <ItemGroup>
+    <ProjectReference Include="..\EscapeGameKiosk.Core\EscapeGameKiosk.Core.csproj" />
+  </ItemGroup>
+
   <!--
     Step 1 – Merge the two source SVGs into a composite logo.svg.
     lock.svg and gear.svg are the sole source of truth; logo.svg is generated.

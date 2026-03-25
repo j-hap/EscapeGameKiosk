@@ -20,31 +20,11 @@ public partial class App : Application
 {
   private IHost? _host;
 
-  /// <summary>
-  /// Resolves the settings file path.
-  /// Priority: --config &lt;path&gt; command-line argument → %APPDATA%\EscapeGameKiosk\appsettings.json.
-  /// Relative paths supplied via --config are resolved against the current working directory.
-  /// </summary>
-  private static string ResolveSettingsPath(string[] args)
-  {
-    for (int i = 0; i < args.Length - 1; i++)
-    {
-      if (args[i].Equals("--config", StringComparison.OrdinalIgnoreCase))
-      {
-        string p = args[i + 1];
-        return Path.IsPathRooted(p) ? p : Path.GetFullPath(p);
-      }
-    }
-    return Path.Combine(
-        Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
-        "EscapeGameKiosk", "appsettings.json");
-  }
-
   protected override void OnStartup(StartupEventArgs e)
   {
     base.OnStartup(e);
 
-    string settingsPath = ResolveSettingsPath(e.Args);
+    string settingsPath = KioskPaths.Resolve(e.Args);
 
     // Fail fast with a clear, actionable message rather than a cryptic file-not-found
     // exception buried inside the DI container build.
@@ -182,7 +162,7 @@ public partial class App : Application
         // install directory (which may be read-only) is never written to at runtime.
         var logPath = Path.Combine(
             Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
-            "EscapeGameKiosk", "logs", "log.txt");
+            KioskPaths.AppDataFolderName, "logs", "log.txt");
         logging.AddFile(logPath, minimumLevel: LogLevel.Information);
       })
       .Build();

@@ -4,6 +4,8 @@ using System.Text.Json.Nodes;
 using System.Windows;
 using System.Windows.Controls;
 using Microsoft.Win32;
+using EscapeGameKiosk;
+using EscapeGameKiosk.Services;
 
 namespace EscapeGameKiosk.Configurator;
 
@@ -69,9 +71,9 @@ public partial class MainWindow : Window
       JsonNode root = JsonNode.Parse(json)
           ?? throw new JsonException("Config file is empty or invalid JSON.");
 
-      JsonNode? appSettings = root["AppSettings"];
-      VideoPathBox.Text = appSettings?["VideoPath"]?.GetValue<string>() ?? string.Empty;
-      PasswordBox.Password = appSettings?["Password"]?.GetValue<string>() ?? string.Empty;
+      JsonNode? appSettings = root[nameof(AppSettings)];
+      VideoPathBox.Text = appSettings?[nameof(AppSettings.VideoPath)]?.GetValue<string>() ?? string.Empty;
+      PasswordBox.Password = appSettings?[nameof(AppSettings.Password)]?.GetValue<string>() ?? string.Empty;
       SetStatus("Settings loaded.", isError: false);
     }
     catch (Exception ex)
@@ -87,9 +89,11 @@ public partial class MainWindow : Window
       string videoPath = VideoPathBox.Text.Trim();
       string password = PasswordBox.Password;
 
-      if (string.IsNullOrEmpty(videoPath))
+      var validationResult = new ConfigurationValidator().Validate(
+        new AppSettings { VideoPath = videoPath, Password = password });
+      if (!validationResult.IsValid)
       {
-        SetStatus("Video path cannot be empty.", isError: true);
+        SetStatus(validationResult.Errors[0], isError: true);
         VideoPathBox.Focus();
         return;
       }
@@ -112,18 +116,18 @@ public partial class MainWindow : Window
       }
 
       // Create or update only the AppSettings section
-      if (root["AppSettings"] is not JsonObject appSettings)
+      if (root[nameof(AppSettings)] is not JsonObject appSettings)
       {
         appSettings = new JsonObject();
-        root["AppSettings"] = appSettings;
+        root[nameof(AppSettings)] = appSettings;
       }
 
-      appSettings["Password"] = JsonValue.Create(password);
-      appSettings["VideoPath"] = JsonValue.Create(videoPath);
+      appSettings[nameof(AppSettings.Password)] = JsonValue.Create(password);
+      appSettings[nameof(AppSettings.VideoPath)] = JsonValue.Create(videoPath);
 
-      // Preserve AllowKeyboardHook if already present; otherwise default true
-      if (appSettings["AllowKeyboardHook"] is null)
-        appSettings["AllowKeyboardHook"] = JsonValue.Create(true);
+      // Preserve AllowKeyboardHook if already present; otherwise use the type-safe default
+      if (appSettings[nameof(AppSettings.AllowKeyboardHook)] is null)
+        appSettings[nameof(AppSettings.AllowKeyboardHook)] = JsonValue.Create(new AppSettings().AllowKeyboardHook);
 
       var writeOptions = new JsonSerializerOptions { WriteIndented = true };
       File.WriteAllText(_settingsPath, root.ToJsonString(writeOptions));

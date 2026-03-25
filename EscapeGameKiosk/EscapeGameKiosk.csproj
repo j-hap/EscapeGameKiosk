@@ -28,7 +28,17 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\EscapeGameKiosk.Core\EscapeGameKiosk.Core.csproj" />
     <ProjectReference Include="..\EscapeGameKiosk.Gestures\EscapeGameKiosk.Gestures.csproj" />
+  </ItemGroup>
+
+  <!-- These files have been moved to EscapeGameKiosk.Core; exclude from compilation here. -->
+  <ItemGroup>
+    <Compile Remove="AppSettings.cs" />
+    <Compile Remove="Services\IConfigurationValidator.cs" />
+    <Compile Remove="Services\ConfigurationValidator.cs" />
+    <Compile Remove="Services\IVideoSourceService.cs" />
+    <Compile Remove="Services\VideoSourceService.cs" />
   </ItemGroup>
 
   <ItemGroup>
